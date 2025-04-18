@@ -1,0 +1,3 @@
+digraph half_adder_tb {
+	graph [rankdir=LR]
+}
