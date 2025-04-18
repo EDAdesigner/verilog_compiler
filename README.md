@@ -10,8 +10,11 @@
 - 考虑运算符优先级
 - 支持括号表达式
 - 自动生成图形文件
+- 提供API服务接口
 
 ## 使用方法
+
+### 命令行使用
 
 ```
 python main.py <input_file.v>
@@ -19,14 +22,56 @@ python main.py <input_file.v>
 
 这将生成一个同名的.dot文件和图形文件(.png)。
 
+### API服务器使用
+
+启动API服务器：
+
+```
+python server.py
+```
+
+服务器将在 `http://localhost:8000` 上运行。您可以通过以下方式使用API：
+
+- POST `/verilog` - 提交Verilog代码并获取生成的图像文件路径
+
+请求示例：
+
+```json
+{
+  "code": "module test(a, b, c); input a, b; output c; assign c = a & b; endmodule"
+}
+```
+
+响应示例：
+
+```json
+{
+  "success": true,
+  "module_name": "verilog_1234abcd",
+  "dot_file": "./result/verilog_1234abcd.dot",
+  "png_file": "./result/verilog_1234abcd.png"
+}
+```
+
+### API文档
+
+访问 `http://localhost:8000/docs` 获取API文档。
+
 ## 环境要求
 
 - Python 3.x
 - Graphviz (用于生成图形)
-- 必须在Windows 11操作系统上运行
+- FastAPI (用于API服务)
+- Uvicorn (用于运行服务器)
 
 ## 安装依赖
 
 ```
 pip install -r requirements.txt
+```
+
+## 测试API
+
+```
+python examples/test_api.py
 ``` 
