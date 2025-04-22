@@ -21,6 +21,7 @@ class Assignment:
     def __init__(self, left, right):
         self.left = left
         self.right = right
+        self.type = 'assign'  # 添加类型标识
 
 class VerilogParser:
     def __init__(self):
@@ -28,6 +29,7 @@ class VerilogParser:
         self.tokens = VerilogLexer.tokens
         self.parser = yacc.yacc(module=self)
         self.module = None
+        self.temp_wire_count = 0
         
     # 语法规则
     def p_module_definition(self, p):
@@ -35,10 +37,16 @@ class VerilogParser:
         p[0] = self.module
         
     def p_port_list(self, p):
-        '''port_list : ID
-                    | ID COMMA port_list'''
-        # 只保存端口名，具体的输入/输出类型会在声明中处理
-        pass
+        '''port_list : port_item
+                    | port_item COMMA port_list'''
+        if len(p) == 2:
+            p[0] = [p[1]]
+        else:
+            p[0] = [p[1]] + p[3]
+
+    def p_port_item(self, p):
+        '''port_item : ID'''
+        p[0] = p[1]
         
     def p_declarations(self, p):
         '''declarations : declaration
@@ -53,34 +61,19 @@ class VerilogParser:
         pass
         
     def p_input_declaration(self, p):
-        '''input_declaration : INPUT ID SEMICOLON
-                           | INPUT LBRACKET NUMBER COLON NUMBER RBRACKET ID SEMICOLON'''
-        if len(p) == 4:
-            self.module.inputs.append(p[2])
-        else:
-            # 处理总线
-            width = p[3] - p[5] + 1
-            self.module.inputs.append(f"{p[7]}[{p[5]}:{p[3]}]")
+        '''input_declaration : INPUT port_list SEMICOLON'''
+        for port in p[2]:
+            self.module.inputs.append(port)
             
     def p_output_declaration(self, p):
-        '''output_declaration : OUTPUT ID SEMICOLON
-                             | OUTPUT LBRACKET NUMBER COLON NUMBER RBRACKET ID SEMICOLON'''
-        if len(p) == 4:
-            self.module.outputs.append(p[2])
-        else:
-            # 处理总线
-            width = p[3] - p[5] + 1
-            self.module.outputs.append(f"{p[7]}[{p[5]}:{p[3]}]")
+        '''output_declaration : OUTPUT port_list SEMICOLON'''
+        for port in p[2]:
+            self.module.outputs.append(port)
             
     def p_wire_declaration(self, p):
-        '''wire_declaration : WIRE ID SEMICOLON
-                          | WIRE LBRACKET NUMBER COLON NUMBER RBRACKET ID SEMICOLON'''
-        if len(p) == 4:
-            self.module.wires.append(p[2])
-        else:
-            # 处理总线
-            width = p[3] - p[5] + 1
-            self.module.wires.append(f"{p[7]}[{p[5]}:{p[3]}]")
+        '''wire_declaration : WIRE port_list SEMICOLON'''
+        for port in p[2]:
+            self.module.wires.append(port)
             
     def p_statements(self, p):
         '''statements : statement
@@ -126,38 +119,36 @@ class VerilogParser:
             p[0] = [p[1]] + p[3]
             
     def p_assign_statement(self, p):
-        '''assign_statement : ASSIGN ID EQUALS expression SEMICOLON
-                          | ASSIGN ID LBRACKET NUMBER RBRACKET EQUALS expression SEMICOLON'''
-        if len(p) == 6:
-            left = p[2]
-        else:
-            left = f"{p[2]}[{p[4]}]"
-            
-        right = p[len(p)-2]
-        
+        '''assign_statement : ASSIGN ID EQUALS expression SEMICOLON'''
+        left = p[2]
+        right = p[4]
         assign = Assignment(left, right)
         self.module.assigns.append(assign)
         
     def p_expression(self, p):
         '''expression : term
-                     | term PLUS expression
-                     | term MINUS expression
-                     | term AMPERSAND expression
-                     | term BAR expression
-                     | term CARET expression'''
+                     | expression PLUS term
+                     | expression AMPERSAND term'''
         if len(p) == 2:
             p[0] = p[1]
         else:
-            p[0] = {'op': p[2], 'left': p[1], 'right': p[3]}
+            if p[2] == '+':
+                # 为加法创建一个临时wire
+                temp_wire = f'temp_wire_{self.temp_wire_count}'
+                self.temp_wire_count += 1
+                self.module.wires.append(temp_wire)
+                p[0] = {'type': 'add', 'left': p[1], 'right': p[3], 'result': temp_wire}
+            elif p[2] == '&':
+                p[0] = {'type': 'and', 'left': p[1], 'right': p[3]}
             
     def p_term(self, p):
-        '''term : factor
-                | factor TIMES term
-                | factor DIVIDE term'''
+        '''term : ID
+               | NUMBER
+               | LPAREN expression RPAREN'''
         if len(p) == 2:
             p[0] = p[1]
         else:
-            p[0] = {'op': p[2], 'left': p[1], 'right': p[3]}
+            p[0] = p[2]
             
     def p_factor(self, p):
         '''factor : primary
