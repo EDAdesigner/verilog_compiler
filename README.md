@@ -32,7 +32,7 @@ python server.py
 
 服务器将在 `http://localhost:8000` 上运行。您可以通过以下方式使用API：
 
-- POST `/verilog` - 提交Verilog代码并获取生成的图像
+- POST `/verilog` - 提交Verilog代码并获取生成的图像文件路径
 
 请求示例：
 
@@ -46,9 +46,10 @@ python server.py
 
 ```json
 {
-  "status": "success",
+  "success": true,
   "module_name": "verilog_1234abcd",
-  "base64_image": "base64编码的图像数据"
+  "dot_file": "./result/verilog_1234abcd.dot",
+  "png_file": "./result/verilog_1234abcd.png"
 }
 ```
 
@@ -62,7 +63,6 @@ python server.py
 - Graphviz (用于生成图形)
 - FastAPI (用于API服务)
 - Uvicorn (用于运行服务器)
-- PIL/Pillow (用于图像处理)
 
 ## 安装依赖
 

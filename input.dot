@@ -1,0 +1,39 @@
+digraph op_exp0 {
+	graph [rankdir=LR]
+	a [label=a color=blue shape=triangle]
+	b [label=b color=blue shape=triangle]
+	c [label=c color=blue shape=triangle]
+	d [label=d color=blue shape=triangle]
+	e [label=e color=blue shape=triangle]
+	q [label=q color=red shape=triangle]
+	sum1 [label=sum1 shape=point]
+	sum2 [label=sum2 shape=point]
+	"+_0" [label="+" shape=box]
+	"+_1" [label="+" shape=box]
+	a -> "+_1"
+	b -> "+_1"
+	"+_1" -> "+_0"
+	c -> "+_0"
+	"+_0" -> sum1
+	"+_2" [label="+" shape=box]
+	"+_3" [label="+" shape=box]
+	a -> "+_3"
+	b -> "+_3"
+	"+_3" -> "+_2"
+	d -> "+_2"
+	"+_2" -> sum2
+	"+_4" [label="+" shape=box]
+	"+_5" [label="+" shape=box]
+	a -> "+_5"
+	b -> "+_5"
+	"+_5" -> "+_4"
+	e -> "+_4"
+	"+_4" -> sum3
+	"&_6" [label="&" shape=box]
+	"&_7" [label="&" shape=box]
+	sum1 -> "&_7"
+	sum2 -> "&_7"
+	"&_7" -> "&_6"
+	sum3 -> "&_6"
+	"&_6" -> q
+}

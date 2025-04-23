@@ -1,0 +1,46 @@
+// input
+digraph {
+	rankdir=LR
+	a [label=a color=blue shape=triangle]
+	b [label=b color=blue shape=triangle]
+	c [label=c color=blue shape=triangle]
+	d [label=d color=blue shape=triangle]
+	e [label=e color=blue shape=triangle]
+	q [label=q color=red shape=triangle]
+	sum1 [label=sum1 shape=point]
+	sum2 [label=sum2 shape=point]
+	add_0 [label="+" shape=box]
+	a -> add_0
+	b -> add_0
+	add_0 -> temp_wire_0
+	add_1 [label="+" shape=box]
+	temp_wire_0 [label="" shape=point]
+	temp_wire_0 -> add_1
+	c -> add_1
+	add_1 -> temp_wire_1
+	temp_wire_1 [label="" shape=point]
+	temp_wire_1 -> sum1
+	add_2 [label="+" shape=box]
+	temp_wire_0 -> add_2
+	d -> add_2
+	add_2 -> temp_wire_5
+	temp_wire_5 [label="" shape=point]
+	temp_wire_5 -> sum2
+	add_3 [label="+" shape=box]
+	temp_wire_0 -> add_3
+	e -> add_3
+	add_3 -> temp_wire_8
+	temp_wire_8 [label="" shape=point]
+	temp_wire_8 -> sum3
+	and_4 [label="&" shape=box]
+	sum1 -> and_4
+	sum2 -> and_4
+	and_4 -> temp_wire_10
+	and_5 [label="&" shape=box]
+	temp_wire_10 [label="" shape=point]
+	temp_wire_10 -> and_5
+	sum3 -> and_5
+	and_5 -> temp_wire_11
+	temp_wire_11 [label="" shape=point]
+	temp_wire_11 -> q
+}

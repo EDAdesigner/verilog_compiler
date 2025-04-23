@@ -14,28 +14,15 @@ class DotGenerator:
     def generate_dot(self):
         # 创建输入节点
         for input_name in self.module.inputs:
-            self.dot.node(input_name, shape='triangle', color='blue')
+            self.dot.node(input_name, input_name, shape='triangle', color='blue')
             
         # 创建输出节点
         for output_name in self.module.outputs:
-            self.dot.node(output_name, shape='triangle', color='red')
+            self.dot.node(output_name, output_name, shape='triangle', color='red')
             
-        # 创建线节点
+        # 创建wire节点
         for wire_name in self.module.wires:
-            self.dot.node(wire_name, shape='point')
-            
-        # 处理门
-        for gate in self.module.gates:
-            # 创建门节点
-            gate_id = f"{gate.name}"
-            self.dot.node(gate_id, label=gate.gate_type, shape='box')
-            
-            # 连接输入到门
-            for input_name in gate.inputs:
-                self.dot.edge(input_name, gate_id)
-                
-            # 连接门到输出
-            self.dot.edge(gate_id, gate.output)
+            self.dot.node(wire_name, wire_name, shape='point')
             
         # 处理赋值语句
         for assign in self.module.assigns:
@@ -55,20 +42,6 @@ class DotGenerator:
                 self.dot.node(node_id, label=str(expr), shape='box', style='filled', fillcolor='lightgrey')
                 return node_id
             return expr
-            
-        # 处理一元操作
-        if 'operand' in expr:
-            # 创建操作节点
-            op = expr['op']
-            node_id = f"{op}_{self.node_counter}"
-            self.node_counter += 1
-            self.dot.node(node_id, label=op, shape='box')
-            
-            # 处理操作数
-            operand_id = self._process_expression(expr['operand'])
-            self.dot.edge(operand_id, node_id)
-            
-            return node_id
             
         # 处理二元操作
         if 'left' in expr and 'right' in expr:
@@ -99,9 +72,11 @@ class DotGenerator:
         base_path = os.path.splitext(output_path)[0]
         
         # 保存DOT文件
-        self.dot.save(f"{base_path}.dot")
+        dot_file = f"{base_path}.dot"
+        self.dot.save(dot_file)
         
         # 渲染并保存图片
+        png_file = f"{base_path}.png"
         self.dot.render(base_path, format='png', cleanup=True)
         
-        return f"{base_path}.dot", f"{base_path}.png" 
+        return dot_file, png_file 

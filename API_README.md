@@ -4,7 +4,7 @@
 
 ## API 服务概述
 
-Verilog 编译器 API 服务提供了一个简单的 HTTP 接口，用于将 Verilog 代码转换为图像表示。服务接收 Verilog 代码文本，并返回生成的图像的base64编码。
+Verilog 编译器 API 服务提供了一个简单的 HTTP 接口，用于将 Verilog 代码转换为图像表示。服务接收 Verilog 代码文本，并返回生成的 DOT 文件和 PNG 图像的路径及可访问的URL。
 
 ## 启动服务
 
@@ -36,9 +36,12 @@ python server.py
 
 ```json
 {
-  "status": "success",
+  "success": true,
   "module_name": "verilog_uuid",
-  "base64_image": "base64编码的图像数据"
+  "dot_file": "./result/verilog_uuid.dot",
+  "png_file": "./result/verilog_uuid.png",
+  "dot_url": "http://localhost:8000/result/verilog_uuid.dot",
+  "png_url": "http://localhost:8000/result/verilog_uuid.png"
 }
 ```
 
@@ -46,8 +49,7 @@ python server.py
 
 ```json
 {
-  "status": "error",
-  "message": "错误信息"
+  "error": "错误信息"
 }
 ```
 
@@ -65,9 +67,6 @@ curl -X POST "http://localhost:8000/verilog" \
 
 ```python
 import requests
-import base64
-from io import BytesIO
-from PIL import Image
 
 url = "http://localhost:8000/verilog"
 payload = {
@@ -76,16 +75,12 @@ payload = {
 
 response = requests.post(url, json=payload)
 data = response.json()
+print(data)
 
-if data["status"] == "success":
-    # 从base64字符串获取图像
-    image_data = base64.b64decode(data["base64_image"])
-    image = Image.open(BytesIO(image_data))
-    
-    # 显示或保存图像
-    image.show()  # 显示图像
-    # 或保存图像
-    # image.save("verilog_graph.png")
+# 直接访问生成的图像
+if "png_url" in data:
+    image_url = data["png_url"]
+    print(f"图像链接: {image_url}")
 ```
 
 ### 使用 JavaScript fetch
@@ -102,16 +97,24 @@ fetch('http://localhost:8000/verilog', {
 })
 .then(response => response.json())
 .then(data => {
-  if (data.status === 'success') {
-    // 显示base64编码的图像
+  console.log(data);
+  // 显示生成的图像
+  if (data.png_url) {
     const img = document.createElement('img');
-    img.src = 'data:image/png;base64,' + data.base64_image;
+    img.src = data.png_url;
     document.body.appendChild(img);
-  } else {
-    console.error(data.message);
   }
 });
 ```
+
+## 访问生成的文件
+
+服务提供静态文件服务，您可以直接通过返回的URL访问生成的DOT文件和PNG图像：
+
+- DOT文件: `http://localhost:8000/result/verilog_uuid.dot`
+- PNG图像: `http://localhost:8000/result/verilog_uuid.png`
+
+文件也存储在服务器的 `./result` 目录中。
 
 ## API 文档
 
