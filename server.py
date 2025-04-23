@@ -4,6 +4,7 @@
 import os
 import uuid
 import tempfile
+import base64
 from fastapi import FastAPI, Request
 from fastapi.responses import JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
@@ -40,7 +41,7 @@ async def process_verilog(request: Request):
         if not verilog_code:
             return JSONResponse(
                 status_code=400, 
-                content={"error": "未提供Verilog代码"}
+                content={"status": "error", "message": "未提供Verilog代码"}
             )
         
         # 生成唯一文件名
@@ -54,7 +55,7 @@ async def process_verilog(request: Request):
         if not module:
             return JSONResponse(
                 status_code=400,
-                content={"error": "解析Verilog代码失败"}
+                content={"status": "error", "message": "解析Verilog代码失败"}
             )
         
         # 生成DOT并保存图形
@@ -70,20 +71,21 @@ async def process_verilog(request: Request):
         dot_url = f"{base_url}/result/{module_name}.dot"
         png_url = f"{base_url}/result/{module_name}.png"
         
-        # 返回文件路径和URL
+        # 将PNG文件转换为base64编码
+        with open(png_file, "rb") as image_file:
+            base64_image = base64.b64encode(image_file.read()).decode('utf-8')
+        
+        # 返回文件信息和base64编码的图像
         return {
-            "success": True,
+            "status": "success",
             "module_name": module_name,
-            "dot_file": dot_file,
-            "png_file": png_file,
-            "dot_url": dot_url,
-            "png_url": png_url
+            "base64_image": base64_image
         }
     
     except Exception as e:
         return JSONResponse(
             status_code=500,
-            content={"error": f"处理Verilog代码时出错: {str(e)}"}
+            content={"status": "error", "message": f"处理Verilog代码时出错: {str(e)}"}
         )
 
 @app.get("/")
