@@ -11,6 +11,7 @@
 - 支持括号表达式
 - 自动生成图形文件
 - 提供API服务接口
+- 支持共享子表达式优化
 
 ## 使用方法
 
@@ -27,35 +28,34 @@ python main.py <input_file.v>
 启动API服务器：
 
 ```
+start_server.bat
+```
+
+或者：
+
+```
 python server.py
 ```
 
-服务器将在 `http://localhost:8000` 上运行。您可以通过以下方式使用API：
+服务器将在 http://localhost:8000 上运行。
 
-- POST `/verilog` - 提交Verilog代码并获取生成的图像文件路径
+#### API端点
 
-请求示例：
+1. `/verilog` - 解析Verilog代码并生成图形
+   - 方法：POST
+   - 参数：verilog_code (表单字段)
+   - 返回：包含状态和生成文件路径的JSON
 
-```json
-{
-  "code": "module test(a, b, c); input a, b; output c; assign c = a & b; endmodule"
-}
+2. `/optimize` - 解析并优化Verilog代码，然后生成图形
+   - 方法：POST
+   - 参数：verilog_code (表单字段)
+   - 返回：包含状态和生成文件路径的JSON
+
+#### 测试API
+
 ```
-
-响应示例：
-
-```json
-{
-  "success": true,
-  "module_name": "verilog_1234abcd",
-  "dot_file": "./result/verilog_1234abcd.dot",
-  "png_file": "./result/verilog_1234abcd.png"
-}
+python test_api.py
 ```
-
-### API文档
-
-访问 `http://localhost:8000/docs` 获取API文档。
 
 ## 环境要求
 
@@ -63,6 +63,7 @@ python server.py
 - Graphviz (用于生成图形)
 - FastAPI (用于API服务)
 - Uvicorn (用于运行服务器)
+- PLY (用于词法和语法分析)
 
 ## 安装依赖
 
@@ -70,8 +71,6 @@ python server.py
 pip install -r requirements.txt
 ```
 
-## 测试API
+## 输出文件
 
-```
-python examples/test_api.py
-``` 
+所有通过API生成的文件都保存在`output`目录中，使用UUID作为文件名以确保唯一性。API返回的响应中包含生成文件的路径信息。 
