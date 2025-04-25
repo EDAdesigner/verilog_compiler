@@ -4,8 +4,9 @@
 import sys
 import os
 import shutil
-from verilog_parser import VerilogParser
-from dot_generator import DotGenerator
+from src.compiler.verilog_parser import VerilogParser, process_verilog
+from src.optimizer.cse_optimizer import CSEOptimizer
+from src.visualizer.dot_generator import DotGenerator
 import argparse
 
 def compile_verilog(input_file, optimize=False):
@@ -79,25 +80,16 @@ def compile_verilog(input_file, optimize=False):
     return True
 
 def main():
-    # 创建命令行参数解析器
-    parser = argparse.ArgumentParser(description='Verilog编译器')
-    parser.add_argument('input_file', help='输入的Verilog文件(.v)')
-    parser.add_argument('--optimize', '-o', action='store_true', help='启用共享子表达式优化')
-    
-    args = parser.parse_args()
-    
-    # 检查文件是否存在
-    if not os.path.exists(args.input_file):
-        print(f"错误: 无法找到文件 '{args.input_file}'")
-        sys.exit(1)
+    if len(sys.argv) != 2:
+        print("使用方法: python main.py <input_file.v>")
+        return False
         
-    # 检查文件扩展名
-    if not args.input_file.lower().endswith('.v'):
-        print(f"警告: 文件 '{args.input_file}' 不是以 .v 为扩展名的Verilog文件")
-    
-    # 编译文件
-    if not compile_verilog(args.input_file, args.optimize):
-        sys.exit(1)
+    input_file = sys.argv[1]
+    if not os.path.exists(input_file):
+        print(f"错误: 文件 '{input_file}' 不存在")
+        return False
+        
+    return process_verilog(input_file)
 
 if __name__ == "__main__":
     main() 
