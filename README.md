@@ -74,28 +74,3 @@ pip install -r requirements.txt
 ## 输出文件
 
 所有通过API生成的文件都保存在`output`目录中，使用UUID作为文件名以确保唯一性。API返回的响应中包含生成文件的路径信息。 
-
-
-
-verilog_compiler/
-├── src/                    # 源代码目录
-│   ├── __init__.py        # 包初始化文件
-│   ├── compiler/          # 编译器核心代码
-│   │   ├── verilog_lexer.py
-│   │   └── verilog_parser.py
-│   ├── optimizer/         # 优化器代码
-│   │   └── cse_optimizer.py
-│   └── visualizer/        # 可视化生成器代码
-│       └── dot_generator.py
-├── examples/              # 示例Verilog文件
-├── scripts/               # 脚本文件
-│   ├── compile_verilog.bat
-│   └── start_server.bat
-├── tests/                # 测试文件
-│   ├── test.py
-│   └── test_api.py
-├── output/              # 输出文件目录
-├── main.py             # 主程序入口
-├── server.py           # API服务器
-├── setup.py           # 安装配置
-└── requirements.txt   # 依赖项
