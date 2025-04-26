@@ -1,75 +1,106 @@
-好的！下面是一个适用于你项目的基本 `README.md` 文件模板，其中包含了关于前端使用 Vue 3 的信息：
+# Verilog 编译器前端项目
 
-```markdown
-# 项目名称
+## 项目简介
 
-## 项目描述
-
-这是一个基于 Vue 3 开发的前端项目，旨在提供一个简洁且高效的用户界面。该项目与后端进行了集成，用于实现计算机仿真任务、原理图编辑器等功能。
+这是一个基于 Vue 3 开发的 Verilog 编译器前端界面，提供代码编辑、仿真和可视化功能。项目采用现代化前端技术栈，具有良好的可维护性和扩展性。
 
 ## 技术栈
 
-- **前端**: Vue 3
-- **后端**: （请补充具体的后端技术栈）
+- **前端框架**: Vue 3 + Composition API
+- **UI 组件库**: Element Plus
+- **构建工具**: Vite
+- **状态管理**: Pinia
+- **路由**: Vue Router
+- **代码编辑器**: Monaco Editor
+- **可视化**: ECharts
 
 ## 项目结构
-├── public/              # 公共资源 │   ├── index.html       # 入口 HTML 文件 ├── src/                 # 源代码 │   ├── assets/          # 静态资源 │   ├── components/      # Vue 组件 │   ├── views/           # 页面视图 │   ├── App.vue          # 根组件 │   ├── main.js          # 项目入口文件 ├── package.json         # 项目依赖配置
+
+verilog-compiler/
+├── public/                # 静态资源
+├── src/
+│   ├── assets/            # 静态资源
+│   ├── components/        # 公共组件
+│   │   └── TheSidebar.vue # 侧边栏组件
+│   ├── pages/             # 页面组件
+│   │   ├── Home.vue       # 首页
+│   │   ├── Editor.vue     # 代码编辑器
+│   │   ├── Simulate.vue   # 仿真页面
+│   │   └── Visualize.vue  # 可视化页面
+│   ├── router/            # 路由配置
+│   │   └── index.js
+│   ├── stores/            # 状态管理
+│   │   └── useEditorStore.js
+│   ├── utils/             # 工具函数
+│   ├── App.vue            # 根组件
+│   └── main.js            # 入口文件
+├── .gitignore
+├── package.json
+├── README.md
+└── vite.config.js
 ```
 
+## 快速开始
 
+### 环境准备
 
-```
-## 安装与运行
+确保已安装：
+- Node.js (>=16.0.0)
+- npm (>=8.0.0) 或 yarn
 
 ### 安装依赖
 
-首先，你需要安装项目的依赖：
-
 ​```bash
 npm install
+# 或
+yarn install
 ```
 
-### 本地开发
-
-安装完依赖后，你可以使用以下命令启动开发服务器：
+### 开发模式
 
 ```bash
 npm run dev
+# 或
+yarn dev
 ```
 
-这时，项目将在本地运行，通常可以通过 `http://localhost:3000` 或 `http://localhost:8080` 来访问你的应用。
+开发服务器将运行在 [http://localhost:3000](http://localhost:3000)
 
-### 构建生产版本
-
-当你准备好发布应用时，可以构建生产版本：
+### 生产构建
 
 ```bash
 npm run build
+# 或
+yarn build
 ```
 
-这将生成一个优化过的生产版本，放在 `dist/` 目录中。
+构建产物将输出到 `dist/` 目录
 
-## 使用 Vue 3
+## 功能特性
 
-本项目使用 Vue 3 构建前端，利用 Vue 3 的响应式系统、组件化设计及其他现代特性，实现了一个灵活且高效的前端界面。Vue 3 使得我们的开发更加高效，同时提升了应用性能。
+- 支持 Verilog 语法高亮和代码补全
+- 实时编译错误检查
+- 波形仿真可视化
+- 模块依赖关系图展示
+- 响应式布局，适配多种设备
 
-## 贡献
+## 开发指南
 
-欢迎任何形式的贡献！如果你有任何建议或遇到问题，请随时提 Issues 或者提交 Pull Requests。
+1. 组件开发请遵循 Vue 3 Composition API 规范
+2. 全局状态使用 Pinia 管理
+3. 新页面需在 `router/index.js` 中注册路由
+4. 提交代码前请运行 lint 检查：
+   ```bash
+   npm run lint
+   ```
+
+## 贡献方式
+
+欢迎通过以下方式参与贡献：
+- 提交 Issues 报告问题
+- 发起 Pull Requests 贡献代码
+- 完善项目文档
 
 ## 许可证
 
-本项目采用 MIT License 许可证。
-
-```
----
-
-### 👌 关键内容：
-- **技术栈**：前端使用 Vue 3，后端部分你可以根据需要补充。
-- **项目结构**：提供了一个简单的项目文件结构，方便开发人员快速理解。
-- **安装与运行**：介绍了如何安装依赖和启动本地开发服务器。
-- **Vue 3 特性**：简单描述了项目使用了 Vue 3，并提到了一些关键特性。
-
-你可以根据实际项目需求调整内容，补充更多细节。😊  
-如果需要更多自定义或修改，随时告诉我！
-```
+[MIT License](LICENSE) © 2023 EDAdesigner
