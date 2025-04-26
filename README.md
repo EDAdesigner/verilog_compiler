@@ -16,6 +16,7 @@
 
 ## 项目结构
 
+```
 verilog-compiler/
 ├── public/                # 静态资源
 ├── src/
@@ -50,7 +51,7 @@ verilog-compiler/
 
 ### 安装依赖
 
-​```bash
+```bash
 npm install
 # 或
 yarn install
