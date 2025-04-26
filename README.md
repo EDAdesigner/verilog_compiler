@@ -13,9 +13,10 @@
 - **后端**: （请补充具体的后端技术栈）
 
 ## 项目结构
+├── public/              # 公共资源 │   ├── index.html       # 入口 HTML 文件 ├── src/                 # 源代码 │   ├── assets/          # 静态资源 │   ├── components/      # Vue 组件 │   ├── views/           # 页面视图 │   ├── App.vue          # 根组件 │   ├── main.js          # 项目入口文件 ├── package.json         # 项目依赖配置
 ```
 
-├── public/              # 公共资源 │   ├── index.html       # 入口 HTML 文件 ├── src/                 # 源代码 │   ├── assets/          # 静态资源 │   ├── components/      # Vue 组件 │   ├── views/           # 页面视图 │   ├── App.vue          # 根组件 │   ├── main.js          # 项目入口文件 ├── package.json         # 项目依赖配置
+
 
 ```
 ## 安装与运行
