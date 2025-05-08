@@ -1,6 +1,8 @@
 import ply.yacc as yacc
 from verilog_lexer import get_lexer, VerilogLexer
 import os
+import sys
+import io
 
 class VerilogModule:
     def __init__(self, name):
@@ -27,7 +29,10 @@ class VerilogParser:
     def __init__(self):
         self.lexer = get_lexer()
         self.tokens = VerilogLexer.tokens
+        old_stdout = sys.stdout
+        sys.stdout = io.StringIO()
         self.parser = yacc.yacc(module=self)
+        sys.stdout = old_stdout
         self.module = None
         
     # 语法规则
@@ -56,7 +61,8 @@ class VerilogParser:
         '''module_item : input_declaration
                       | output_declaration
                       | wire_declaration
-                      | assign_statement'''
+                      | assign_statement
+                      | gate_instantiation'''
         pass
         
     def p_input_declaration(self, p):
@@ -94,24 +100,67 @@ class VerilogParser:
     def p_expression(self, p):
         '''expression : term
                      | expression PLUS term
-                     | expression AMPERSAND term'''
+                     | expression MINUS term
+                     | expression AMPERSAND term
+                     | expression BAR term
+                     | expression CARET term'''
         if len(p) == 2:
             p[0] = p[1]
         else:
-            p[0] = {'op': p[2], 'left': p[1], 'right': p[3]}
+            if p[2] == '+':
+                p[0] = {'op': '+', 'left': p[1], 'right': p[3]}
+            elif p[2] == '-':
+                p[0] = {'op': '-', 'left': p[1], 'right': p[3]}
+            elif p[2] == '&':
+                p[0] = {'op': '&', 'left': p[1], 'right': p[3]}
+            elif p[2] == '|':
+                p[0] = {'op': '|', 'left': p[1], 'right': p[3]}
+            elif p[2] == '^':
+                p[0] = {'op': 'xor', 'left': p[1], 'right': p[3]}
             
     def p_term(self, p):
         '''term : ID
                | NUMBER
-               | LPAREN expression RPAREN'''
+               | LPAREN expression RPAREN
+               | TILDE term'''
         if len(p) == 2:
             p[0] = p[1]
+        elif len(p) == 3 and p[1] == '~':
+            p[0] = {'op': '~', 'right': p[2]}
         else:
             p[0] = p[2]
             
     def p_empty(self, p):
         '''empty :'''
         pass
+        
+    def p_gate_instantiation(self, p):
+        '''gate_instantiation : gate_type ID LPAREN signal_list RPAREN SEMICOLON'''
+        gate_type = p[1]
+        gate_name = p[2]
+        signals = p[4]
+        output = signals[-1]
+        inputs = signals[:-1]
+        self.module.gates.append(Gate(gate_type, gate_name, inputs, output))
+
+    def p_gate_type(self, p):
+        '''gate_type : AND
+                    | OR
+                    | NOT
+                    | NAND
+                    | NOR
+                    | XOR
+                    | XNOR
+                    | BUF'''
+        p[0] = p[1]
+
+    def p_signal_list(self, p):
+        '''signal_list : ID
+                      | signal_list COMMA ID'''
+        if len(p) == 2:
+            p[0] = [p[1]]
+        else:
+            p[0] = p[1] + [p[3]]
         
     def p_error(self, p):
         if p:

@@ -24,9 +24,18 @@ class DotGenerator:
         for wire_name in self.module.wires:
             self.dot.node(wire_name, wire_name, shape='point')
             
+        # 处理门级实例化
+        for gate in getattr(self.module, 'gates', []):
+            gate_node = f"{gate.gate_type}_{gate.name}"
+            self.dot.node(gate_node, label=gate.gate_type, shape='box')
+            # 输入连到门
+            for inp in gate.inputs:
+                self.dot.edge(inp, gate_node)
+            # 门连到输出
+            self.dot.edge(gate_node, gate.output)
+            
         # 处理赋值语句
-        for assign in self.module.assigns:
-            # 处理右侧表达式并将其连接到左侧
+        for assign in getattr(self.module, 'assigns', []):
             output_node = self._process_expression(assign.right)
             self.dot.edge(output_node, assign.left)
             
@@ -36,31 +45,30 @@ class DotGenerator:
         # 如果表达式是简单的标识符或数字
         if isinstance(expr, str) or isinstance(expr, int):
             if isinstance(expr, int):
-                # 为常量创建一个节点
                 node_id = f"const_{expr}_{self.node_counter}"
                 self.node_counter += 1
                 self.dot.node(node_id, label=str(expr), shape='box', style='filled', fillcolor='lightgrey')
                 return node_id
             return expr
-            
-        # 处理二元操作
-        if 'left' in expr and 'right' in expr:
-            # 创建操作节点
+        # 一元操作（如~）
+        if isinstance(expr, dict) and expr.get('op') == '~':
+            node_id = f"~_{self.node_counter}"
+            self.node_counter += 1
+            self.dot.node(node_id, label='~', shape='box')
+            right_id = self._process_expression(expr['right'])
+            self.dot.edge(right_id, node_id)
+            return node_id
+        # 二元操作
+        if isinstance(expr, dict) and 'left' in expr and 'right' in expr:
             op = expr['op']
             node_id = f"{op}_{self.node_counter}"
             self.node_counter += 1
             self.dot.node(node_id, label=op, shape='box')
-            
-            # 处理左右操作数
             left_id = self._process_expression(expr['left'])
             right_id = self._process_expression(expr['right'])
-            
             self.dot.edge(left_id, node_id)
             self.dot.edge(right_id, node_id)
-            
             return node_id
-            
-        # 默认情况
         return str(expr)
         
     def save(self, output_path=None):

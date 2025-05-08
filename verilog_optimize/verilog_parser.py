@@ -1,5 +1,7 @@
 import ply.yacc as yacc
 from verilog_lexer import get_lexer, VerilogLexer
+import sys
+import io
 
 class VerilogModule:
     def __init__(self, name):
@@ -28,7 +30,10 @@ class VerilogParser:
     def __init__(self):
         self.lexer = get_lexer()
         self.tokens = VerilogLexer.tokens
+        old_stdout = sys.stdout
+        sys.stdout = io.StringIO()
         self.parser = yacc.yacc(module=self)
+        sys.stdout = old_stdout
         self.module = None
         self.temp_wire_count = 0
         
