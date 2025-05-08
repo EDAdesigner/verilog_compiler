@@ -2,6 +2,28 @@
 
 这是一个简易的Verilog编译器，可以将Verilog文件(.v)解析并生成DOT格式的图形表示。
 
+## 项目结构
+
+```
+verilog_compiler/
+├── src/                    # 源代码目录
+│   ├── main.py            # 主程序
+│   ├── verilog_parser.py  # Verilog解析器
+│   ├── dot_generator.py   # DOT图形生成器
+│   ├── verilog_lexer.py   # 词法分析器
+│   ├── server.py          # API服务器
+│   └── verilog_optimize/  # 优化相关代码
+├── script/                 # 脚本文件目录
+│   ├── compile_verilog.bat # 编译脚本
+│   └── start_server.bat   # 启动服务器脚本
+├── input/                  # 输入文件目录
+│   └── *.v                # Verilog源文件
+├── output/                 # 输出文件目录
+│   ├── *.dot              # 生成的DOT文件
+│   └── *.png              # 生成的图形文件
+└── tests/                  # 测试文件目录
+```
+
 ## 功能特点
 
 - 支持Verilog端口、门级信息提取
@@ -18,23 +40,29 @@
 ### 命令行使用
 
 ```
-python main.py <input_file.v>
+python src/main.py input/example.v
 ```
 
-这将生成一个同名的.dot文件和图形文件(.png)。
+或者使用批处理文件：
+
+```
+script/compile_verilog.bat input/example.v
+```
+
+这将生成一个同名的.dot文件和图形文件(.png)在output目录中。
 
 ### API服务器使用
 
 启动API服务器：
 
 ```
-start_server.bat
+script/start_server.bat
 ```
 
 或者：
 
 ```
-python server.py
+python src/server.py
 ```
 
 服务器将在 http://localhost:8000 上运行。
@@ -54,7 +82,7 @@ python server.py
 #### 测试API
 
 ```
-python test_api.py
+python tests/test_api.py
 ```
 
 ## 环境要求
@@ -68,9 +96,9 @@ python test_api.py
 ## 安装依赖
 
 ```
-pip install -r requirements.txt
+pip install -r src/requirements.txt
 ```
 
 ## 输出文件
 
-所有通过API生成的文件都保存在`output`目录中，使用UUID作为文件名以确保唯一性。API返回的响应中包含生成文件的路径信息。 
+所有生成的文件都保存在`output`目录中。对于API调用，使用UUID作为文件名以确保唯一性。API返回的响应中包含生成文件的路径信息。 

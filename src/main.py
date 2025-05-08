@@ -63,8 +63,13 @@ def compile_verilog(input_file, optimize=False):
     try:
         dot = dot_generator.generate_dot()
         
-        # 保存文件（使用相同的基本文件名）
-        output_base = os.path.splitext(input_file)[0]
+        # 创建输出目录（如果不存在）
+        output_dir = "output"
+        if not os.path.exists(output_dir):
+            os.makedirs(output_dir)
+        
+        # 保存文件到输出目录
+        output_base = os.path.join(output_dir, os.path.splitext(os.path.basename(input_file))[0])
         if optimize:
             output_base += "_optimized"
         dot_file, png_file = dot_generator.save(output_base)

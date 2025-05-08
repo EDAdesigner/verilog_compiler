@@ -1,7 +1,0 @@
-digraph default_module {
-	graph [rankdir=LR]
-	a [label=a color=blue shape=triangle]
-	b [label=b color=blue shape=triangle]
-	c [label=c color=blue shape=triangle]
-	q [label=q color=red shape=triangle]
-}

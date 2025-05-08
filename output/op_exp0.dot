@@ -1,0 +1,36 @@
+digraph shared_exp {
+	graph [rankdir=LR]
+	a [label=a color=blue shape=triangle]
+	b [label=b color=blue shape=triangle]
+	c [label=c color=blue shape=triangle]
+	d [label=d color=blue shape=triangle]
+	e [label=e color=blue shape=triangle]
+	q [label=q color=red shape=triangle]
+	common_sum [label=common_sum shape=point]
+	sum1 [label=sum1 shape=point]
+	sum2 [label=sum2 shape=point]
+	sum3 [label=sum3 shape=point]
+	"+_0" [label="+" shape=box]
+	a -> "+_0"
+	b -> "+_0"
+	"+_0" -> common_sum
+	"+_1" [label="+" shape=box]
+	common_sum -> "+_1"
+	c -> "+_1"
+	"+_1" -> sum1
+	"+_2" [label="+" shape=box]
+	common_sum -> "+_2"
+	d -> "+_2"
+	"+_2" -> sum2
+	"+_3" [label="+" shape=box]
+	common_sum -> "+_3"
+	e -> "+_3"
+	"+_3" -> sum3
+	"&_4" [label="&" shape=box]
+	"&_5" [label="&" shape=box]
+	sum1 -> "&_5"
+	sum2 -> "&_5"
+	"&_5" -> "&_4"
+	sum3 -> "&_4"
+	"&_4" -> q
+}

@@ -1,3 +1,0 @@
-@echo off
-echo 正在启动Verilog编译器API服务器...
-python server.py 
