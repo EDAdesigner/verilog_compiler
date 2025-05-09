@@ -67,6 +67,7 @@ async def parse_verilog(verilog_code: str = Form(...)):
     解析Verilog代码并生成图形
     """
     try:
+        print(verilog_code)
         result = process_verilog(verilog_code, optimize=False)
         print(result)
         return JSONResponse(content=result)
@@ -82,6 +83,7 @@ async def optimize_verilog(verilog_code: str = Form(...)):
     解析并优化Verilog代码，然后生成图形
     """
     try:
+        print(verilog_code)
         result = process_verilog(verilog_code, optimize=True)
         return JSONResponse(content=result)
     except Exception as e:

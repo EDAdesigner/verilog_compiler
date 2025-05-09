@@ -1,0 +1,44 @@
+digraph full_adder {
+	graph [concentrate=false dpi=300 nodesep=0.5 ordering=out rankdir=LR ranksep=0.8 splines=polyline]
+	node [fillcolor=white fontname=Arial fontsize=12 height=0.4 margin=0.1 penwidth=1.0 shape=record style=filled width=0.6]
+	edge [arrowhead=normal arrowsize=0.6 fontname=Arial fontsize=10 penwidth=1.0]
+	a [label=a fillcolor=lightblue shape=ellipse style=filled]
+	b [label=b fillcolor=lightblue shape=ellipse style=filled]
+	cin [label=cin fillcolor=lightblue shape=ellipse style=filled]
+	sum [label=sum fillcolor=lightgreen shape=ellipse style=filled]
+	cout [label=cout fillcolor=lightgreen shape=ellipse style=filled]
+	s1 [label=s1 fillcolor=lightyellow shape=box style=filled]
+	c1 [label=c1 fillcolor=lightyellow shape=box style=filled]
+	c2 [label=c2 fillcolor=lightyellow shape=box style=filled]
+	xor_xor1 [label="{<a> a|<b> b}|{$03\nXOR}|<s1> s1" fillcolor=lightpink shape=record style=filled]
+	a -> xor_xor1:a
+	b -> xor_xor1:b
+	xor_xor1:s1 -> s1
+	and_and1 [label="{<a> a|<b> b}|{$04\nAND}|<c1> c1" fillcolor=lightpink shape=record style=filled]
+	a -> and_and1:a
+	b -> and_and1:b
+	and_and1:c1 -> c1
+	xor_xor2 [label="{<s1> s1|<cin> cin}|{$05\nXOR}|<sum> sum" fillcolor=lightpink shape=record style=filled]
+	s1 -> xor_xor2:s1
+	cin -> xor_xor2:cin
+	xor_xor2:sum -> sum
+	and_and2 [label="{<s1> s1|<cin> cin}|{$06\nAND}|<c2> c2" fillcolor=lightpink shape=record style=filled]
+	s1 -> and_and2:s1
+	cin -> and_and2:cin
+	and_and2:c2 -> c2
+	or_or1 [label="{<c1> c1|<c2> c2}|{$07\nOR}|<cout> cout" fillcolor=lightpink shape=record style=filled]
+	c1 -> or_or1:c1
+	c2 -> or_or1:c2
+	or_or1:cout -> cout
+	subgraph cluster_inputs {
+		color=lightblue label=Inputs rank=source style=filled
+		a
+		b
+		cin
+	}
+	subgraph cluster_outputs {
+		color=lightgreen label=Outputs rank=sink style=filled
+		sum
+		cout
+	}
+}

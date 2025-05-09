@@ -1,0 +1,24 @@
+digraph multiplexer_assign {
+	graph [concentrate=false dpi=300 nodesep=0.5 ordering=out rankdir=LR ranksep=0.8 splines=polyline]
+	node [fillcolor=white fontname=Arial fontsize=12 height=0.4 margin=0.1 penwidth=1.0 shape=record style=filled width=0.6]
+	edge [arrowhead=normal arrowsize=0.6 fontname=Arial fontsize=10 penwidth=1.0]
+	a [label=a fillcolor=lightblue shape=ellipse style=filled]
+	b [label=b fillcolor=lightblue shape=ellipse style=filled]
+	s [label=s fillcolor=lightblue shape=ellipse style=filled]
+	y [label=y fillcolor=lightgreen shape=ellipse style=filled]
+	assign_y [label="{<A> if true|<B> if false|<S> select}|{$00\nMUX}|<y> y" fillcolor=lavender shape=record style=filled]
+	s -> assign_y:S
+	b -> assign_y:A
+	a -> assign_y:B
+	assign_y:y -> y
+	subgraph cluster_inputs {
+		color=lightblue label=Inputs rank=source style=filled
+		a
+		b
+		s
+	}
+	subgraph cluster_outputs {
+		color=lightgreen label=Outputs rank=sink style=filled
+		y
+	}
+}

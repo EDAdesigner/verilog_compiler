@@ -22,9 +22,18 @@
 
 ### 命令行方式
 
-基本用法：
+基本用法（使用增强型电路图生成器）：
 ```
 python main.py <your_verilog_file.v>
+```
+
+使用传统样式（原始电路图生成器）：
+```
+python main.py <your_verilog_file.v> --classic
+```
+或
+```
+python main.py <your_verilog_file.v> -c
 ```
 
 启用优化选项：
@@ -36,10 +45,28 @@ python main.py <your_verilog_file.v> --optimize
 python main.py <your_verilog_file.v> -o
 ```
 
+同时使用多个选项：
+```
+python main.py <your_verilog_file.v> --optimize --classic
+```
+
 例如：
 ```
-python main.py examples/full_adder.v
-python main.py examples/full_adder.v --optimize
+python main.py examples/half_adder.v
+python main.py examples/multiplexer.v --classic
+python main.py examples/test_circuit.v --optimize
+```
+
+### 特殊电路图生成
+
+生成多路选择器图形：
+```
+python src/generate_mux.py
+```
+
+生成与参考图像一致的多路选择器：
+```
+python src/generate_spmux.py
 ```
 
 ### 使用批处理脚本
@@ -100,6 +127,75 @@ compile_verilog.bat examples/full_adder.v
    - 减少电路中重复的逻辑门
 
 使用 `--optimize` 或 `-o` 选项启用优化功能。
+
+## 电路图样式
+
+编译器支持多种不同的电路图表示样式：
+
+1. **增强样式（默认）** - 根据电路类型自动选择合适的表示方式
+   ```
+   python main.py examples/half_adder.v
+   ```
+
+2. **传统样式** - 使用简单的节点和箭头表示
+   ```
+   python main.py examples/half_adder.v --classic
+   ```
+
+3. **模块框样式** - 使用矩形框和端口组表示的样式，更接近电路原理图
+   ```
+   python src/generate_mux.py
+   ```
+
+4. **精确样式** - 与参考图像完全一致的样式，包括符号编号
+   ```
+   python src/generate_spmux.py
+   ```
+
+### 增强型电路图生成器
+
+增强型电路图生成器可以自动识别电路类型并应用合适的图形样式：
+
+1. **多路选择器(Multiplexer)** - 当检测到模块名称包含"mux"或"select"时
+   - 自动识别数据输入和选择信号输入
+   - 使用$nn格式的符号编号
+   - 使用"Spmux"作为模块类型名称
+
+2. **加法器(Adder)** - 当检测到模块名称包含"adder"时
+   - 自动识别a、b、cin输入和sum、cout输出
+   - 根据名称是否包含"half"或"full"确定加法器类型
+   - 使用标准模块表示
+
+3. **默认样式** - 对于其他类型的电路
+   - 使用统一的模块框样式
+   - 采用$nn格式的符号编号
+   - 保持模块原始名称
+
+### 符号编号格式
+
+符号编号采用以下格式：
+- 格式：`$nn`，其中nn为两位数字
+- 示例：`$26`表示26号模块
+- 符号编号显示在模块的左上角
+
+### 特殊模块类型
+
+目前支持的特殊模块类型包括：
+
+1. **Spmux** - 多路选择器
+   - 输入：A, B, S
+   - 输出：Y
+   - 功能：根据S的值选择A或B作为输出
+
+2. **Decoder** - 解码器
+   - 输入：I0, I1, ...
+   - 输出：Y0, Y1, ...
+   - 功能：将二进制输入解码为单热码输出
+
+3. **Register** - 寄存器
+   - 输入：D0-Dn, CLK, RST, LD
+   - 输出：Q0-Qn
+   - 功能：时序存储数据位
 
 ## 故障排除
 

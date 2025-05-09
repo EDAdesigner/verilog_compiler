@@ -103,10 +103,11 @@ class VerilogParser:
                      | expression MINUS term
                      | expression AMPERSAND term
                      | expression BAR term
-                     | expression CARET term'''
+                     | expression CARET term
+                     | term QUESTION expression COLON expression'''
         if len(p) == 2:
             p[0] = p[1]
-        else:
+        elif len(p) == 4:
             if p[2] == '+':
                 p[0] = {'op': '+', 'left': p[1], 'right': p[3]}
             elif p[2] == '-':
@@ -117,6 +118,8 @@ class VerilogParser:
                 p[0] = {'op': '|', 'left': p[1], 'right': p[3]}
             elif p[2] == '^':
                 p[0] = {'op': 'xor', 'left': p[1], 'right': p[3]}
+        elif len(p) == 6:  # 三元操作符: condition ? if_true : if_false
+            p[0] = {'op': '?:', 'condition': p[1], 'if_true': p[3], 'if_false': p[5]}
             
     def p_term(self, p):
         '''term : ID

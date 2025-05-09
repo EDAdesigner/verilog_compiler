@@ -1,0 +1,12 @@
+digraph spmux_exact {
+	graph [nodesep=0.5 rankdir=TB splines=ortho]
+	spmux [label="{{<A> A|<B> B|<S> S}|{$26\nSpmux}|<Y> Y}" fillcolor=white fontname=Arial shape=record style=filled]
+	A_in [label="" shape=point style=invis]
+	B_in [label="" shape=point style=invis]
+	S_in [label="" shape=point style=invis]
+	A_in -> spmux:A [arrowhead=normal arrowsize=0.7]
+	B_in -> spmux:B [arrowhead=normal arrowsize=0.7]
+	S_in -> spmux:S [arrowhead=normal arrowsize=0.7]
+	Y_out [label="" shape=point style=invis]
+	spmux:Y -> Y_out [arrowhead=normal arrowsize=0.7]
+}

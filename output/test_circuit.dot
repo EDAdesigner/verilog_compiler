@@ -1,0 +1,45 @@
+digraph test_circuit {
+	graph [concentrate=false dpi=300 nodesep=0.5 ordering=out rankdir=LR ranksep=0.8 splines=polyline]
+	node [fillcolor=white fontname=Arial fontsize=12 height=0.4 margin=0.1 penwidth=1.0 shape=record style=filled width=0.6]
+	edge [arrowhead=normal arrowsize=0.6 fontname=Arial fontsize=10 penwidth=1.0]
+	a [label=a fillcolor=lightblue shape=ellipse style=filled]
+	b [label=b fillcolor=lightblue shape=ellipse style=filled]
+	c [label=c fillcolor=lightblue shape=ellipse style=filled]
+	sel [label=sel fillcolor=lightblue shape=ellipse style=filled]
+	out1 [label=out1 fillcolor=lightgreen shape=ellipse style=filled]
+	out2 [label=out2 fillcolor=lightgreen shape=ellipse style=filled]
+	mux_out [label=mux_out fillcolor=lightyellow shape=box style=filled]
+	sum [label=sum fillcolor=lightyellow shape=box style=filled]
+	carry [label=carry fillcolor=lightyellow shape=box style=filled]
+	xor_xor1 [label="{<mux_out> mux_out|<c> c}|{$03\nXOR}|<sum> sum" fillcolor=lightpink shape=record style=filled]
+	mux_out -> xor_xor1:mux_out
+	c -> xor_xor1:c
+	xor_xor1:sum -> sum
+	and_and1 [label="{<mux_out> mux_out|<c> c}|{$04\nAND}|<carry> carry" fillcolor=lightpink shape=record style=filled]
+	mux_out -> and_and1:mux_out
+	c -> and_and1:c
+	and_and1:carry -> carry
+	assign_mux_out [label="{<A> if true|<B> if false|<S> select}|{$05\nMUX}|<mux_out> mux_out" fillcolor=lavender shape=record style=filled]
+	sel -> assign_mux_out:S
+	b -> assign_mux_out:A
+	a -> assign_mux_out:B
+	assign_mux_out:mux_out -> mux_out
+	assign_out1 [label="{<A> in}|{$06\nBUF}|<out1> out1" fillcolor=lavender shape=record style=filled]
+	sum -> assign_out1:A
+	assign_out1:out1 -> out1
+	assign_out2 [label="{<A> in}|{$07\nBUF}|<out2> out2" fillcolor=lavender shape=record style=filled]
+	carry -> assign_out2:A
+	assign_out2:out2 -> out2
+	subgraph cluster_inputs {
+		color=lightblue label=Inputs rank=source style=filled
+		a
+		b
+		c
+		sel
+	}
+	subgraph cluster_outputs {
+		color=lightgreen label=Outputs rank=sink style=filled
+		out1
+		out2
+	}
+}

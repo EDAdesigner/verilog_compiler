@@ -1,0 +1,12 @@
+digraph spmux {
+	graph [nodesep=0.5 rankdir=TB splines=ortho]
+	node [fontname=Arial height=0.6 width=1.2]
+	edge [arrowsize=0.7]
+	inputs [label="<A> A|<B> B|<S0> S0" shape=record]
+	outputs [label="<Y> Y" shape=record]
+	module [label="{$26|Spmux}" fillcolor=lightgray shape=record style=filled]
+	inputs:A -> module
+	inputs:B -> module
+	inputs:S0 -> module
+	module -> outputs:Y
+}

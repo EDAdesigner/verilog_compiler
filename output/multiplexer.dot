@@ -1,0 +1,37 @@
+digraph multiplexer {
+	graph [concentrate=false dpi=300 nodesep=0.5 ordering=out rankdir=LR ranksep=0.8 splines=polyline]
+	node [fillcolor=white fontname=Arial fontsize=12 height=0.4 margin=0.1 penwidth=1.0 shape=record style=filled width=0.6]
+	edge [arrowhead=normal arrowsize=0.6 fontname=Arial fontsize=10 penwidth=1.0]
+	a [label=a fillcolor=lightblue shape=ellipse style=filled]
+	b [label=b fillcolor=lightblue shape=ellipse style=filled]
+	s [label=s fillcolor=lightblue shape=ellipse style=filled]
+	y [label=y fillcolor=lightgreen shape=ellipse style=filled]
+	not_s [label=not_s fillcolor=lightyellow shape=box style=filled]
+	and1_out [label=and1_out fillcolor=lightyellow shape=box style=filled]
+	and2_out [label=and2_out fillcolor=lightyellow shape=box style=filled]
+	not_not1 [label="{<s> s}|{$03\nNOT}|<not_s> not_s" fillcolor=lightpink shape=record style=filled]
+	s -> not_not1:s
+	not_not1:not_s -> not_s
+	and_and1 [label="{<a> a|<not_s> not_s}|{$04\nAND}|<and1_out> and1_out" fillcolor=lightpink shape=record style=filled]
+	a -> and_and1:a
+	not_s -> and_and1:not_s
+	and_and1:and1_out -> and1_out
+	and_and2 [label="{<b> b|<s> s}|{$05\nAND}|<and2_out> and2_out" fillcolor=lightpink shape=record style=filled]
+	b -> and_and2:b
+	s -> and_and2:s
+	and_and2:and2_out -> and2_out
+	or_or1 [label="{<and1_out> and1_out|<and2_out> and2_out}|{$06\nOR}|<y> y" fillcolor=lightpink shape=record style=filled]
+	and1_out -> or_or1:and1_out
+	and2_out -> or_or1:and2_out
+	or_or1:y -> y
+	subgraph cluster_inputs {
+		color=lightblue label=Inputs rank=source style=filled
+		a
+		b
+		s
+	}
+	subgraph cluster_outputs {
+		color=lightgreen label=Outputs rank=sink style=filled
+		y
+	}
+}

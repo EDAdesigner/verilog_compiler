@@ -12,6 +12,9 @@ verilog_compiler/
 │   ├── dot_generator.py   # DOT图形生成器
 │   ├── verilog_lexer.py   # 词法分析器
 │   ├── server.py          # API服务器
+│   ├── generate_mux.py    # 多路选择器生成器
+│   ├── generate_spmux.py  # 精确样式多路选择器生成器
+│   ├── module_library.py  # 常用模块库
 │   └── verilog_optimize/  # 优化相关代码
 ├── script/                 # 脚本文件目录
 │   ├── compile_verilog.bat # 编译脚本
@@ -34,13 +37,26 @@ verilog_compiler/
 - 自动生成图形文件
 - 提供API服务接口
 - 支持共享子表达式优化
+- 支持特殊电路图样式与符号编号
+- **新增**: 增强型电路图生成，自动识别电路类型并应用适当样式
 
 ## 使用方法
 
 ### 命令行使用
 
+基本用法（使用增强型电路图生成器）：
 ```
 python src/main.py input/example.v
+```
+
+使用传统样式（原始电路图生成器）：
+```
+python src/main.py input/example.v --classic
+```
+
+启用优化选项：
+```
+python src/main.py input/example.v --optimize
 ```
 
 或者使用批处理文件：
@@ -50,6 +66,20 @@ script/compile_verilog.bat input/example.v
 ```
 
 这将生成一个同名的.dot文件和图形文件(.png)在output目录中。
+
+### 特殊电路图生成
+
+生成多路选择器图形：
+
+```
+python src/generate_mux.py
+```
+
+生成精确样式的多路选择器图形：
+
+```
+python src/generate_spmux.py
+```
 
 ### API服务器使用
 
@@ -85,6 +115,24 @@ python src/server.py
 python tests/test_api.py
 ```
 
+## 电路图样式
+
+本编译器支持生成多种样式的电路图：
+
+1. **标准样式** - 传统的箭头连接的节点图
+2. **模块框样式** - 类似原理图的矩形框表示
+3. **精确样式** - 与指定参考图完全一致的样式，包括符号编号
+
+电路图样式示例:
+
+```
++-------+
+|   A   |
+|   B   | $26  |   Y   |
+|   S   | Spmux|       |
++-------+
+```
+
 ## 环境要求
 
 - Python 3.x
@@ -101,4 +149,4 @@ pip install -r src/requirements.txt
 
 ## 输出文件
 
-所有生成的文件都保存在`output`目录中。对于API调用，使用UUID作为文件名以确保唯一性。API返回的响应中包含生成文件的路径信息。 
+所有生成的文件都保存在`output`目录中。对于API调用，使用UUID作为文件名以确保唯一性。API返回的响应中包含生成文件的路径信息。
