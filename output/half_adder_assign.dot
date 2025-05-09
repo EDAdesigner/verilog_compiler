@@ -1,24 +1,27 @@
-digraph multiplexer_assign {
+digraph half_adder_assign {
 	graph [concentrate=false dpi=300 nodesep=0.5 ordering=out rankdir=LR ranksep=0.8 splines=polyline]
 	node [fillcolor=white fontname=Arial fontsize=12 height=0.4 margin=0.1 penwidth=1.0 shape=record style=filled width=0.6]
 	edge [arrowhead=normal arrowsize=0.6 fontname=Arial fontsize=10 penwidth=1.0]
 	a [label=a fillcolor=lightblue shape=ellipse style=filled]
 	b [label=b fillcolor=lightblue shape=ellipse style=filled]
-	s [label=s fillcolor=lightblue shape=ellipse style=filled]
-	y [label=y fillcolor=lightgreen shape=ellipse style=filled]
-	assign_y [label="{{<A> b|<B> a|<S> s}|{$00\nMUX}|<y> y}" fillcolor=lavender shape=record style=filled]
-	s -> assign_y:S
-	b -> assign_y:A
-	a -> assign_y:B
-	assign_y:y -> y
+	sum [label=sum fillcolor=lightgreen shape=ellipse style=filled]
+	carry [label=carry fillcolor=lightgreen shape=ellipse style=filled]
+	assign_sum [label="{{<A> a|<B> b}|{$00\nXOR}|<sum> sum}" fillcolor=lavender shape=record style=filled]
+	a -> assign_sum:A
+	b -> assign_sum:B
+	assign_sum:sum -> sum
+	assign_carry [label="{{<A> a|<B> b}|{$01\nAND}|<carry> carry}" fillcolor=lavender shape=record style=filled]
+	a -> assign_carry:A
+	b -> assign_carry:B
+	assign_carry:carry -> carry
 	subgraph cluster_inputs {
 		color=lightblue label=Inputs rank=source style=filled
 		a
 		b
-		s
 	}
 	subgraph cluster_outputs {
 		color=lightgreen label=Outputs rank=sink style=filled
-		y
+		sum
+		carry
 	}
 }

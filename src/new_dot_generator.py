@@ -150,11 +150,10 @@ class EnhancedDotGenerator:
             port_parts = []
             for inp in gate.inputs:
                 port_parts.append(f"<{inp}> {inp}")
-            
             input_ports = "{" + "|".join(port_parts) + "}"
             output_port = f"<{gate.output}> {gate.output}"
-            
-            gate_label = f"{input_ports}|{{{gate_id}\\n{gate_type}}}|{output_port}"
+            # 三段式横向结构（加最外层大括号，左中右）
+            gate_label = f"{{{input_ports}|{{{gate_id}\\n{gate_type}}}|{output_port}}}"
             
             # 创建门节点
             self.dot.node(gate_node, gate_label, shape='record', 
@@ -229,13 +228,13 @@ class EnhancedDotGenerator:
     def _create_mux_node(self, node_id, sym_id, expr, output_name):
         """创建多路选择器节点（三元操作符）"""
         # 创建端口
-        if_true_port = "<A> if true"
-        if_false_port = "<B> if false"
-        cond_port = "<S> select"
+        if_true_port = f"<A> {expr['if_true']}" if isinstance(expr['if_true'], str) else "<A> if true"
+        if_false_port = f"<B> {expr['if_false']}" if isinstance(expr['if_false'], str) else "<B> if false"
+        cond_port = f"<S> {expr['condition']}" if isinstance(expr['condition'], str) else "<S> select"
         output_port = f"<{output_name}> {output_name}"
         
         # 创建标签
-        label = f"{{{if_true_port}|{if_false_port}|{cond_port}}}|{{{sym_id}\\nMUX}}|{output_port}"
+        label = f"{{{{{if_true_port}|{if_false_port}|{cond_port}}}|{{{sym_id}\\nMUX}}|{output_port}}}"
         
         # 创建节点
         self.dot.node(node_id, label, shape='record', 
@@ -274,12 +273,12 @@ class EnhancedDotGenerator:
         op_label = self._get_operation_type_label(expr['op'])
         
         # 创建端口
-        left_port = "<A> A"
-        right_port = "<B> B"
+        left_port = f"<A> {expr['left']}" if isinstance(expr['left'], str) else "<A> A"
+        right_port = f"<B> {expr['right']}" if isinstance(expr['right'], str) else "<B> B"
         output_port = f"<{output_name}> {output_name}"
         
         # 创建标签
-        label = f"{{{left_port}|{right_port}}}|{{{sym_id}\\n{op_label}}}|{output_port}"
+        label = f"{{{{{left_port}|{right_port}}}|{{{sym_id}\\n{op_label}}}|{output_port}}}"
         
         # 创建节点
         self.dot.node(node_id, label, shape='record', 
@@ -308,11 +307,11 @@ class EnhancedDotGenerator:
     def _create_buf_node(self, node_id, sym_id, input_value, output_name):
         """创建BUF节点（简单赋值）"""
         # 创建端口
-        input_port = "<A> in"
+        input_port = f"<A> {input_value}" if isinstance(input_value, str) else "<A> in"
         output_port = f"<{output_name}> {output_name}"
         
         # 创建标签
-        label = f"{{{input_port}}}|{{{sym_id}\\nBUF}}|{output_port}"
+        label = f"{{{input_port}|{{{sym_id}\\nBUF}}|{output_port}}}"
         
         # 创建节点
         self.dot.node(node_id, label, shape='record', 

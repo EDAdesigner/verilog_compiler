@@ -1,0 +1,58 @@
+digraph gates_demo {
+	graph [concentrate=false dpi=300 nodesep=0.5 ordering=out rankdir=LR ranksep=0.8 splines=polyline]
+	node [fillcolor=white fontname=Arial fontsize=12 height=0.4 margin=0.1 penwidth=1.0 shape=record style=filled width=0.6]
+	edge [arrowhead=normal arrowsize=0.6 fontname=Arial fontsize=10 penwidth=1.0]
+	a [label=a fillcolor=lightblue shape=ellipse style=filled]
+	b [label=b fillcolor=lightblue shape=ellipse style=filled]
+	c [label=c fillcolor=lightblue shape=ellipse style=filled]
+	and_out [label=and_out fillcolor=lightgreen shape=ellipse style=filled]
+	or_out [label=or_out fillcolor=lightgreen shape=ellipse style=filled]
+	not_out [label=not_out fillcolor=lightgreen shape=ellipse style=filled]
+	nand_out [label=nand_out fillcolor=lightgreen shape=ellipse style=filled]
+	nor_out [label=nor_out fillcolor=lightgreen shape=ellipse style=filled]
+	xor_out [label=xor_out fillcolor=lightgreen shape=ellipse style=filled]
+	xnor_out [label=xnor_out fillcolor=lightgreen shape=ellipse style=filled]
+	and_and1 [label="{{<a> a|<b> b}|{$00\nAND}|<and_out> and_out}" fillcolor=lightpink shape=record style=filled]
+	a -> and_and1:a
+	b -> and_and1:b
+	and_and1:and_out -> and_out
+	or_or1 [label="{{<a> a|<b> b}|{$01\nOR}|<or_out> or_out}" fillcolor=lightpink shape=record style=filled]
+	a -> or_or1:a
+	b -> or_or1:b
+	or_or1:or_out -> or_out
+	not_not1 [label="{{<a> a}|{$02\nNOT}|<not_out> not_out}" fillcolor=lightpink shape=record style=filled]
+	a -> not_not1:a
+	not_not1:not_out -> not_out
+	nand_nand1 [label="{{<a> a|<b> b}|{$03\nNAND}|<nand_out> nand_out}" fillcolor=lightpink shape=record style=filled]
+	a -> nand_nand1:a
+	b -> nand_nand1:b
+	nand_nand1:nand_out -> nand_out
+	nor_nor1 [label="{{<a> a|<b> b}|{$04\nNOR}|<nor_out> nor_out}" fillcolor=lightpink shape=record style=filled]
+	a -> nor_nor1:a
+	b -> nor_nor1:b
+	nor_nor1:nor_out -> nor_out
+	xor_xor1 [label="{{<a> a|<b> b}|{$05\nXOR}|<xor_out> xor_out}" fillcolor=lightpink shape=record style=filled]
+	a -> xor_xor1:a
+	b -> xor_xor1:b
+	xor_xor1:xor_out -> xor_out
+	xnor_xnor1 [label="{{<a> a|<b> b}|{$06\nXNOR}|<xnor_out> xnor_out}" fillcolor=lightpink shape=record style=filled]
+	a -> xnor_xnor1:a
+	b -> xnor_xnor1:b
+	xnor_xnor1:xnor_out -> xnor_out
+	subgraph cluster_inputs {
+		color=lightblue label=Inputs rank=source style=filled
+		a
+		b
+		c
+	}
+	subgraph cluster_outputs {
+		color=lightgreen label=Outputs rank=sink style=filled
+		and_out
+		or_out
+		not_out
+		nand_out
+		nor_out
+		xor_out
+		xnor_out
+	}
+}

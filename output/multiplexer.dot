@@ -9,18 +9,18 @@ digraph multiplexer {
 	not_s [label=not_s fillcolor=lightyellow shape=box style=filled]
 	and1_out [label=and1_out fillcolor=lightyellow shape=box style=filled]
 	and2_out [label=and2_out fillcolor=lightyellow shape=box style=filled]
-	not_not1 [label="{<s> s}|{$03\nNOT}|<not_s> not_s" fillcolor=lightpink shape=record style=filled]
+	not_not1 [label="{{<s> s}|{$03\nNOT}|<not_s> not_s}" fillcolor=lightpink shape=record style=filled]
 	s -> not_not1:s
 	not_not1:not_s -> not_s
-	and_and1 [label="{<a> a|<not_s> not_s}|{$04\nAND}|<and1_out> and1_out" fillcolor=lightpink shape=record style=filled]
+	and_and1 [label="{{<a> a|<not_s> not_s}|{$04\nAND}|<and1_out> and1_out}" fillcolor=lightpink shape=record style=filled]
 	a -> and_and1:a
 	not_s -> and_and1:not_s
 	and_and1:and1_out -> and1_out
-	and_and2 [label="{<b> b|<s> s}|{$05\nAND}|<and2_out> and2_out" fillcolor=lightpink shape=record style=filled]
+	and_and2 [label="{{<b> b|<s> s}|{$05\nAND}|<and2_out> and2_out}" fillcolor=lightpink shape=record style=filled]
 	b -> and_and2:b
 	s -> and_and2:s
 	and_and2:and2_out -> and2_out
-	or_or1 [label="{<and1_out> and1_out|<and2_out> and2_out}|{$06\nOR}|<y> y" fillcolor=lightpink shape=record style=filled]
+	or_or1 [label="{{<and1_out> and1_out|<and2_out> and2_out}|{$06\nOR}|<y> y}" fillcolor=lightpink shape=record style=filled]
 	and1_out -> or_or1:and1_out
 	and2_out -> or_or1:and2_out
 	or_or1:y -> y

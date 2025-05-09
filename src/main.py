@@ -12,7 +12,7 @@ import argparse
 def compile_verilog(input_file, optimize=False, enhanced_style=True, show_internal=False):
     """编译Verilog文件"""
     try:
-        with open(input_file, 'r') as f:
+        with open(input_file, 'r', encoding='utf-8') as f:
             verilog_code = f.read()
     except Exception as e:
         print(f"错误: 无法读取文件 '{input_file}': {e}")
