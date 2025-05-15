@@ -1,0 +1,31 @@
+digraph unbalanced_add4 {
+	graph [concentrate=false dpi=300 nodesep=0.5 ordering=out rankdir=LR ranksep=0.8 splines=polyline]
+	node [fillcolor=white fontname=Arial fontsize=12 height=0.4 margin=0.1 penwidth=1.0 shape=record style=filled width=0.6]
+	edge [arrowhead=normal arrowsize=0.6 fontname=Arial fontsize=10 penwidth=1.0]
+	a [label=a fillcolor=lightblue shape=ellipse style=filled]
+	b [label=b fillcolor=lightblue shape=ellipse style=filled]
+	c [label=c fillcolor=lightblue shape=ellipse style=filled]
+	d [label=d fillcolor=lightblue shape=ellipse style=filled]
+	out [label=out fillcolor=lightgreen shape=ellipse style=filled]
+	assign_out_L1_L2 [label="{{<A> a|<B> b}|{$03\nADD}|<assign_out_L1_L2> assign_out_L1_L2}" fillcolor=lavender shape=record style=filled]
+	a -> assign_out_L1_L2:A
+	b -> assign_out_L1_L2:B
+	assign_out_L1 [label="{{<A> assign_out_L1_L2|<B> c}|{$02\nADD}|<assign_out_L1> assign_out_L1}" fillcolor=lavender shape=record style=filled]
+	assign_out_L1_L2 -> assign_out_L1:A
+	c -> assign_out_L1:B
+	assign_out [label="{{<A> assign_out_L1|<B> d}|{$00\nADD}|<out> out}" fillcolor=lavender shape=record style=filled]
+	assign_out_L1 -> assign_out:A
+	d -> assign_out:B
+	assign_out:out -> out
+	subgraph cluster_inputs {
+		color=lightblue label=Inputs rank=source style=filled
+		a
+		b
+		c
+		d
+	}
+	subgraph cluster_outputs {
+		color=lightgreen label=Outputs rank=sink style=filled
+		out
+	}
+}

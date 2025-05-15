@@ -269,38 +269,51 @@ class EnhancedDotGenerator:
             self._create_edge(f"{node_id}:{output_name}", output_name)
     
     def _create_op_node(self, node_id, sym_id, expr, output_name):
-        """创建操作符节点（二元操作符）"""
+        """创建操作符节点（二元操作符），递归处理左右表达式"""
         op_label = self._get_operation_type_label(expr['op'])
-        
-        # 创建端口
-        left_port = f"<A> {expr['left']}" if isinstance(expr['left'], str) else "<A> A"
-        right_port = f"<B> {expr['right']}" if isinstance(expr['right'], str) else "<B> B"
+
+        # 递归处理左操作数
+        if isinstance(expr['left'], dict):
+            left_node_id = f"{node_id}_L{self.node_counter}"
+            self.node_counter += 1
+            self._create_op_node(left_node_id, f"${self.node_counter:02d}", expr['left'], left_node_id)
+            left_port = f"<A> {left_node_id}"
+        else:
+            left_port = f"<A> {expr['left']}"
+
+        # 递归处理右操作数
+        if isinstance(expr['right'], dict):
+            right_node_id = f"{node_id}_R{self.node_counter}"
+            self.node_counter += 1
+            self._create_op_node(right_node_id, f"${self.node_counter:02d}", expr['right'], right_node_id)
+            right_port = f"<B> {right_node_id}"
+        else:
+            right_port = f"<B> {expr['right']}"
+
         output_port = f"<{output_name}> {output_name}"
-        
-        # 创建标签
         label = f"{{{{{left_port}|{right_port}}}|{{{sym_id}\\n{op_label}}}|{output_port}}}"
-        
-        # 创建节点
-        self.dot.node(node_id, label, shape='record', 
-                     style='filled', fillcolor=self.node_colors['assign'])
-        
-        # 处理左操作数
-        if isinstance(expr['left'], str):
-            if expr['left'] in self.module.inputs or expr['left'] in self.module.wires:
-                self._create_edge(expr['left'], f"{node_id}:A")
-            else:
-                left_node = self._get_or_create_constant_node(expr['left'])
-                self._create_edge(left_node, f"{node_id}:A")
-        
-        # 处理右操作数
-        if isinstance(expr['right'], str):
-            if expr['right'] in self.module.inputs or expr['right'] in self.module.wires:
-                self._create_edge(expr['right'], f"{node_id}:B")
-            else:
-                right_node = self._get_or_create_constant_node(expr['right'])
-                self._create_edge(right_node, f"{node_id}:B")
-        
-        # 处理输出连接
+
+        self.dot.node(node_id, label, shape='record', style='filled', fillcolor=self.node_colors['assign'])
+
+        # 连接左操作数
+        if isinstance(expr['left'], dict):
+            self._create_edge(left_node_id, f"{node_id}:A")
+        elif expr['left'] in self.module.inputs or expr['left'] in self.module.wires:
+            self._create_edge(expr['left'], f"{node_id}:A")
+        else:
+            left_const = self._get_or_create_constant_node(expr['left'])
+            self._create_edge(left_const, f"{node_id}:A")
+
+        # 连接右操作数
+        if isinstance(expr['right'], dict):
+            self._create_edge(right_node_id, f"{node_id}:B")
+        elif expr['right'] in self.module.inputs or expr['right'] in self.module.wires:
+            self._create_edge(expr['right'], f"{node_id}:B")
+        else:
+            right_const = self._get_or_create_constant_node(expr['right'])
+            self._create_edge(right_const, f"{node_id}:B")
+
+        # 连接输出
         if output_name in self.module.wires or output_name in self.module.outputs:
             self._create_edge(f"{node_id}:{output_name}", output_name)
     

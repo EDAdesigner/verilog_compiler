@@ -69,8 +69,8 @@ def compile_verilog(input_file, optimize=False, enhanced_style=True, show_intern
         # 使用增强型图形生成器
         if enhanced_style:
             dot_generator = EnhancedDotGenerator(module)
-            # 设置是否显示内部细节
-            dot_generator.set_show_internal(show_internal)
+            # 强制显示内部细节
+            dot_generator.set_show_internal(True)
             # 根据模块类型自动检测和设置样式
             if hasattr(module, 'name'):
                 if 'mux' in module.name.lower() or 'select' in module.name.lower():
