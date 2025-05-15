@@ -176,13 +176,23 @@ class VerilogParser:
         right = p[4]
         # 处理表达式，获取最终的wire名称
         result_wire = self._process_expression(right)
-        if isinstance(right, dict):
-            # 如果是复杂表达式，创建一个简单的赋值
+        # 判断是否为输出端口，且右侧为中间wire，直接连线不生成BUF
+        if left in self.module.outputs and isinstance(result_wire, str) and result_wire.startswith('temp_wire_'):
+            self.module.assigns.append(Assignment(left, result_wire))
+        elif isinstance(right, dict):
             self.module.assigns.append(Assignment(left, result_wire))
         else:
-            # 如果是简单表达式，直接创建赋值
             self.module.assigns.append(Assignment(left, right))
         
+    def _balance_add_chain(self, add_list):
+        """递归将加法链分组为平衡二叉树结构，返回表达式树结构，不生成wire和assign"""
+        if len(add_list) == 1:
+            return add_list[0]
+        mid = len(add_list) // 2
+        left = self._balance_add_chain(add_list[:mid])
+        right = self._balance_add_chain(add_list[mid:])
+        return {'type': 'add', 'left': left, 'right': right}
+
     def p_expression(self, p):
         '''expression : term
                      | expression PLUS term
@@ -191,11 +201,18 @@ class VerilogParser:
             p[0] = p[1]
         else:
             if p[2] == '+':
-                # 为加法创建一个临时wire
-                temp_wire = f'temp_wire_{self.temp_wire_count}'
-                self.temp_wire_count += 1
-                self.module.wires.append(temp_wire)
-                p[0] = {'type': 'add', 'left': p[1], 'right': p[3], 'result': temp_wire}
+                # 收集加法链
+                def flatten_add(expr):
+                    # 递归展开所有加法项，兼容不同结构
+                    if isinstance(expr, dict) and (expr.get('type') == 'add' or expr.get('op') == '+'):
+                        return flatten_add(expr['left']) + flatten_add(expr['right'])
+                    else:
+                        return [expr]
+                left_terms = flatten_add(p[1])
+                right_terms = flatten_add(p[3])
+                all_terms = left_terms + right_terms
+                # 树高平衡
+                p[0] = self._balance_add_chain(all_terms)
             elif p[2] == '&':
                 p[0] = {'type': 'and', 'left': p[1], 'right': p[3]}
             
