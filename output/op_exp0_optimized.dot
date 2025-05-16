@@ -1,0 +1,24 @@
+digraph op_exp0 {
+	graph [concentrate=false dpi=300 nodesep=0.5 ordering=out rankdir=LR ranksep=0.8 splines=polyline]
+	node [fillcolor=white fontname=Arial fontsize=12 height=0.4 margin=0.1 penwidth=1.0 shape=record style=filled width=0.6]
+	edge [arrowhead=normal arrowsize=0.6 fontname=Arial fontsize=10 penwidth=1.0]
+	a [label=a fillcolor=lightblue shape=ellipse style=filled]
+	b [label=b fillcolor=lightblue shape=ellipse style=filled]
+	c [label=c fillcolor=lightblue shape=ellipse style=filled]
+	d [label=d fillcolor=lightblue shape=ellipse style=filled]
+	e [label=e fillcolor=lightblue shape=ellipse style=filled]
+	q [label=q fillcolor=lightgreen shape=ellipse style=filled]
+	common_sum [label=common_sum fillcolor=lightyellow shape=box style=filled]
+	subgraph cluster_inputs {
+		color=lightblue label=Inputs rank=source style=filled
+		a
+		b
+		c
+		d
+		e
+	}
+	subgraph cluster_outputs {
+		color=lightgreen label=Outputs rank=sink style=filled
+		q
+	}
+}

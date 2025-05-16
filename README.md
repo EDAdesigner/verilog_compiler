@@ -150,3 +150,72 @@ pip install -r src/requirements.txt
 ## 输出文件
 
 所有生成的文件都保存在`output`目录中。对于API调用，使用UUID作为文件名以确保唯一性。API返回的响应中包含生成文件的路径信息。
+
+# Verilog/BLIF 调度与可视化工具
+
+## 简介
+本工具支持对 BLIF 文件进行 ML-RCS 调度，并输出调度结果与门级甘特图。适用于数字电路综合、优化与可视化分析。
+
+## 依赖环境
+- Python 3.7+
+- matplotlib
+
+安装依赖：
+```bash
+pip install matplotlib
+```
+
+## 使用方法
+
+### 1. 命令行调度与输出
+
+基本用法：
+```bash
+python src/schedule.py <输入BLIF文件> <输出TXT文件>
+```
+
+例如：
+```bash
+python src/schedule.py examples/sample.blif output/sample.txt
+```
+
+### 2. 生成并保存甘特图
+
+在命令后加 `--plot` 参数：
+```bash
+python src/schedule.py examples/sample.blif output/sample.txt --plot
+```
+- 程序会自动弹出甘特图窗口
+- 并将图片保存为 `output/gantt.png`
+
+### 3. 输出文件说明
+- 输出TXT文件包含：
+  - 输入输出信号列表
+  - 总调度周期数
+  - 每周期调度门列表
+  - 每个门的开始时间、结束时间
+- 输出图片为门级调度甘特图，横坐标为时间，纵坐标为门名，颜色区分门类型（浅色系）。
+
+## 结果示例
+```
+Input :a, b, c, d, e, f  Output :o, p, q
+Total 8 Cycles
+Cycle 0:{h, g, i}
+Cycle 1:{p}
+Cycle 2:{}
+Cycle 3:{j}
+Cycle 4:{l, m}
+Cycle 5:{}
+Cycle 6:{n, k}
+Cycle 7:{o, q}
+Minimize Cycle: 8
+h: Start Time: 0, End Time: 0
+...
+```
+
+## 其他说明
+- 支持自定义BLIF文件输入
+- 支持自定义输出路径
+- 支持自动保存甘特图
+
+如有问题或需定制功能，请联系开发者。

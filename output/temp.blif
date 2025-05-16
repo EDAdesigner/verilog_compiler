@@ -1,0 +1,14 @@
+.model circuit
+.inputs 
+.outputs 
+.names s not_s
+0 1
+.names a not_s and1_out
+11 1
+.names b s and2_out
+11 1
+.names and1_out and2_out y
+01 1
+10 1
+11 1
+.end

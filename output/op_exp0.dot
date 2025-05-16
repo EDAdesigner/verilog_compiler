@@ -12,23 +12,27 @@ digraph shared_exp {
 	sum1 [label=sum1 fillcolor=lightyellow shape=box style=filled]
 	sum2 [label=sum2 fillcolor=lightyellow shape=box style=filled]
 	sum3 [label=sum3 fillcolor=lightyellow shape=box style=filled]
-	assign_common_sum [label="{<A> A|<B> B}|{$04\nADD}|<common_sum> common_sum" fillcolor=lavender shape=record style=filled]
+	assign_common_sum [label="{{<A> a|<B> b}|{$04\nADD}|<common_sum> common_sum}" fillcolor=lavender shape=record style=filled]
 	a -> assign_common_sum:A
 	b -> assign_common_sum:B
 	assign_common_sum:common_sum -> common_sum
-	assign_sum1 [label="{<A> A|<B> B}|{$05\nADD}|<sum1> sum1" fillcolor=lavender shape=record style=filled]
+	assign_sum1 [label="{{<A> common_sum|<B> c}|{$05\nADD}|<sum1> sum1}" fillcolor=lavender shape=record style=filled]
 	common_sum -> assign_sum1:A
 	c -> assign_sum1:B
 	assign_sum1:sum1 -> sum1
-	assign_sum2 [label="{<A> A|<B> B}|{$06\nADD}|<sum2> sum2" fillcolor=lavender shape=record style=filled]
+	assign_sum2 [label="{{<A> common_sum|<B> d}|{$06\nADD}|<sum2> sum2}" fillcolor=lavender shape=record style=filled]
 	common_sum -> assign_sum2:A
 	d -> assign_sum2:B
 	assign_sum2:sum2 -> sum2
-	assign_sum3 [label="{<A> A|<B> B}|{$07\nADD}|<sum3> sum3" fillcolor=lavender shape=record style=filled]
+	assign_sum3 [label="{{<A> common_sum|<B> e}|{$07\nADD}|<sum3> sum3}" fillcolor=lavender shape=record style=filled]
 	common_sum -> assign_sum3:A
 	e -> assign_sum3:B
 	assign_sum3:sum3 -> sum3
-	assign_q [label="{<A> A|<B> B}|{$08\nAND}|<q> q" fillcolor=lavender shape=record style=filled]
+	assign_q_L9 [label="{{<A> sum1|<B> sum2}|{$10\nAND}|<assign_q_L9> assign_q_L9}" fillcolor=lavender shape=record style=filled]
+	sum1 -> assign_q_L9:A
+	sum2 -> assign_q_L9:B
+	assign_q [label="{{<A> assign_q_L9|<B> sum3}|{$08\nAND}|<q> q}" fillcolor=lavender shape=record style=filled]
+	assign_q_L9 -> assign_q:A
 	sum3 -> assign_q:B
 	assign_q:q -> q
 	subgraph cluster_inputs {

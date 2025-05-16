@@ -1,0 +1,22 @@
+Input :a, b, c, d, e, f  Output :o, p, q
+Total 8 Cycles
+Cycle 0:{h, g, i}
+Cycle 1:{p}
+Cycle 2:{}
+Cycle 3:{j}
+Cycle 4:{l, m}
+Cycle 5:{}
+Cycle 6:{n, k}
+Cycle 7:{o, q}
+Minimize Cycle: 8
+g: Start Time: 0, End Time: 2
+h: Start Time: 0, End Time: 2
+i: Start Time: 0, End Time: 0
+j: Start Time: 3, End Time: 5
+k: Start Time: 6, End Time: 8
+l: Start Time: 4, End Time: 6
+m: Start Time: 4, End Time: 6
+n: Start Time: 6, End Time: 8
+o: Start Time: 7, End Time: 9
+p: Start Time: 1, End Time: 1
+q: Start Time: 7, End Time: 7

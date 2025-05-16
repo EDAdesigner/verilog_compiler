@@ -188,7 +188,6 @@ class EnhancedDotGenerator:
             assign_id = f"${self.node_counter:02d}"
             self.node_counter += 1
 
-            # 兼容优化器生成的 {'type': 'add', ...} 结构
             expr = assign.right
             if isinstance(expr, dict):
                 # 如果是优化器的结构，转换为标准结构
@@ -197,8 +196,6 @@ class EnhancedDotGenerator:
                         expr = {'op': '+', 'left': expr['left'], 'right': expr['right']}
                     elif expr['type'] == 'and':
                         expr = {'op': '&', 'left': expr['left'], 'right': expr['right']}
-                    # 可继续扩展其它类型
-
                 if 'op' in expr:
                     op = expr['op']
                     if op == '?:':
@@ -206,13 +203,13 @@ class EnhancedDotGenerator:
                     else:
                         self._create_op_node(assign_node, assign_id, expr, assign.left)
                 else:
-                    # 如果是 wire 到 output，直接连线，不生成BUF节点
+                    # 只在assign.left为output且expr为wire时直接连线，其余情况生成BUF节点
                     if assign.left in self.module.outputs and isinstance(expr, str) and expr.startswith('temp_wire_'):
                         self._create_edge(expr, assign.left)
                     else:
                         self._create_buf_node(assign_node, assign_id, expr, assign.left)
             else:
-                # 如果是 wire 到 output，直接连线，不生成BUF节点
+                # 只在assign.left为output且expr为wire时直接连线，其余情况生成BUF节点
                 if assign.left in self.module.outputs and isinstance(expr, str) and expr.startswith('temp_wire_'):
                     self._create_edge(expr, assign.left)
                 else:

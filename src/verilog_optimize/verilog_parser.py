@@ -1,5 +1,5 @@
 import ply.yacc as yacc
-from verilog_lexer import get_lexer, VerilogLexer
+from .verilog_lexer import get_lexer, VerilogLexer
 import sys
 import io
 
@@ -55,8 +55,8 @@ class VerilogParser:
         p[0] = p[1]
         
     def p_declarations(self, p):
-        '''declarations : declaration
-                       | declaration declarations
+        '''declarations : declarations declaration
+                       | declaration
                        | empty'''
         pass
         
@@ -82,8 +82,8 @@ class VerilogParser:
             self.module.wires.append(port)
             
     def p_statements(self, p):
-        '''statements : statement
-                     | statement statements
+        '''statements : statements statement
+                     | statement
                      | empty'''
         pass
         
