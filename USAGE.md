@@ -221,4 +221,80 @@ compile_verilog.bat examples/full_adder.v
 - 文件操作错误：显示具体的文件访问问题
 - 优化相关错误：显示优化过程中遇到的问题
 
-如果遇到问题，请查看控制台输出的完整错误信息以进行诊断。 
+如果遇到问题，请查看控制台输出的完整错误信息以进行诊断。
+
+## Verilog转BLIF与列表调度工具使用说明
+
+### 工具位置
+
+`src/verilog_scheduling.py`
+
+### 基本功能
+1. **Verilog转BLIF格式**：将Verilog文件(.v)转换为BLIF格式文件。
+2. **ML-RCS列表调度**：对Verilog描述的电路进行最小延迟的列表调度，支持自定义资源数，输出每周期调度结果。
+
+### 命令行参数
+
+```
+python src/verilog_scheduling.py <verilog_file> [output_blif_file] [--schedule a]
+```
+- `<verilog_file>`：输入的Verilog源文件（如`examples/op_exp0.v`）
+- `[output_blif_file]`：可选，输出的BLIF文件名（不指定则与输入同名，扩展名为.blif）
+- `--schedule a`：可选，启用ML-RCS列表调度算法，`a`为每种资源的数量（如2、3等）
+
+### 功能说明
+
+#### 1. Verilog转BLIF
+
+将Verilog文件转换为BLIF格式：
+```
+python src/verilog_scheduling.py examples/op_exp0.v
+```
+输出：`examples/op_exp0.blif`
+
+#### 2. ML-RCS列表调度
+
+对Verilog文件进行最小延迟列表调度，指定资源数a：
+```
+python src/verilog_scheduling.py examples/op_exp0.v --schedule 2
+```
+输出示例：
+```
+IInput:['a', 'b', 'c', 'd', 'e'],Output:['q']
+Cycle 1: common_sum(ADD)
+Cycle 2: sum1(ADD), sum2(ADD)
+Cycle 3: sum3(ADD), tmp_4_l(AND)
+Cycle 4: q(AND)
+```
+- 每个Cycle列出本周期调度的操作及类型。
+- 资源数a可自定义。
+
+#### 3. MR-LCS最小资源列表调度
+
+对Verilog文件进行最小资源消耗的列表调度：
+```
+python src/verilog_scheduling.py examples/op_exp0.v --mr-lcs
+```
+输出示例：
+```
+Input: a, b, c, d, e
+Output: q
+Total 4 Cycles, 与门2个，或门0个，非门0个
+Cycle 0: {}, {}, {}, {common_sum}
+Cycle 1: {}, {}, {}, {sum1  sum2  sum3}
+Cycle 2: {}, {}, {}, {}
+Cycle 3: {q}, {}, {}, {}
+```
+- 每行Cycle后依次为：{与门}, {或门}, {非门}, {其它}
+- 总周期数、各类门数量统计均已输出
+- 输入输出端口信息清晰
+
+### 输出格式说明
+- **BLIF模式**：生成标准BLIF文件，适用于后续逻辑综合等工具。
+- **ML-RCS调度模式**：终端输出调度周期及每周期的操作。
+- **MR-LCS调度模式**：终端输出最小资源调度周期及每周期的操作，门类型分组统计。
+
+### 注意事项
+- 仅支持门级、assign表达式的调度。
+- 三元表达式暂不支持调度。
+- 若需扩展调度算法或输出格式，请参考`src/verilog_scheduling.py`源码。 

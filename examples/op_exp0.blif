@@ -1,0 +1,10 @@
+.model shared_exp
+.inputs a b c d e
+.outputs q
+.names common_sum sum1 sum2 sum3
+.names common_sum {'op': '+', 'left': 'a', 'right': 'b'}
+.names sum1 {'op': '+', 'left': 'common_sum', 'right': 'c'}
+.names sum2 {'op': '+', 'left': 'common_sum', 'right': 'd'}
+.names sum3 {'op': '+', 'left': 'common_sum', 'right': 'e'}
+.names q {'op': '&', 'left': {'op': '&', 'left': 'sum1', 'right': 'sum2'}, 'right': 'sum3'}
+.end
