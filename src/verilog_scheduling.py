@@ -3,6 +3,7 @@
 
 import os
 import sys
+import argparse
 from verilog_parser import VerilogParser
 
 def verilog_to_blif(input_file, output_file=None):
@@ -67,81 +68,89 @@ def generate_blif(module):
     blif_lines.append(".end")
     return "\n".join(blif_lines)
 
-def list_schedule(module, resource_num=2):
+def list_schedule(module, resource_dict=None):
     """
-    ML-RCS列表调度算法实现，resource_num为每种资源的数量
-    输出格式：IInput:[inputs],Output:[outputs]\nCycle 1: ...\nCycle 2: ...
+    支持多周期门和每种门型资源受限的ML-RCS列表调度算法。
+    resource_dict: {'AND': 2, 'OR': 2, 'NOT': 1}  # 每种门型的资源数
     """
+    op_latency = {'OR': 2, 'AND': 3, 'NOT': 1, '+': 1, '-': 1, 'XOR': 1}
+    if resource_dict is None:
+        resource_dict = {'AND': 2, 'OR': 2, 'NOT': 1}
     # 1. 收集所有操作（assign和门）及其依赖
-    # 操作节点格式：{'name':..., 'type':..., 'inputs':[], 'output':..., 'deps':set(), 'scheduled':False, 'cycle':None}
     nodes = []
     name2node = {}
-    # 先处理assign
     for assign in module.assigns:
-        # 递归解析表达式树，拆分为基本操作
         def parse_expr(expr, out_name):
             if isinstance(expr, str):
                 return []
             if isinstance(expr, dict):
                 op_type = expr['op']
-                if op_type in ['+', '-', '&', '|', '^']:
+                if op_type in ['+', '-', 'AND', 'OR', 'XOR']:
                     left = expr['left']
                     right = expr['right']
                     left_name = left if isinstance(left, str) else f"tmp_{len(nodes)}_l"
                     right_name = right if isinstance(right, str) else f"tmp_{len(nodes)}_r"
-                    # 递归处理左右
                     nodes_l = parse_expr(left, left_name)
                     nodes_r = parse_expr(right, right_name)
-                    node = {'name': out_name, 'type': op_type, 'inputs':[left_name, right_name], 'output':out_name, 'deps':set([left_name, right_name]), 'scheduled':False, 'cycle':None}
+                    node = {'name': out_name, 'type': op_type, 'inputs':[left_name, right_name], 'output':out_name, 'deps':set([left_name, right_name]), 'scheduled':False, 'cycle':None, 'ready':0}
                     nodes_l.extend(nodes_r)
                     nodes_l.append(node)
                     name2node[out_name] = node
                     return nodes_l
-                elif op_type == '~':
+                elif op_type == 'NOT':
                     right = expr['right']
                     right_name = right if isinstance(right, str) else f"tmp_{len(nodes)}_r"
                     nodes_r = parse_expr(right, right_name)
-                    node = {'name': out_name, 'type': 'NOT', 'inputs':[right_name], 'output':out_name, 'deps':set([right_name]), 'scheduled':False, 'cycle':None}
+                    node = {'name': out_name, 'type': 'NOT', 'inputs':[right_name], 'output':out_name, 'deps':set([right_name]), 'scheduled':False, 'cycle':None, 'ready':0}
                     nodes_r.append(node)
                     name2node[out_name] = node
                     return nodes_r
                 elif op_type == '?:':
-                    # 三元暂不支持
                     return []
             return []
         nodes.extend(parse_expr(assign.right, assign.left))
-    # 处理门级实例化
     for gate in module.gates:
-        node = {'name': gate.name, 'type': gate.gate_type, 'inputs':gate.inputs, 'output':gate.output, 'deps':set(gate.inputs), 'scheduled':False, 'cycle':None}
+        node = {'name': gate.name, 'type': gate.gate_type, 'inputs':gate.inputs, 'output':gate.output, 'deps':set(gate.inputs), 'scheduled':False, 'cycle':None, 'ready':0}
         nodes.append(node)
         name2node[gate.output] = node
-    # 2. 建立依赖关系
-    # 只保留依赖于其他操作输出的依赖
     outputs = set([n['output'] for n in nodes])
     for n in nodes:
         n['deps'] = set([d for d in n['deps'] if d in outputs])
-    # 3. 列表调度
+    # 2. 多周期调度+多资源类型
     schedule = []
     cycle = 1
     unscheduled = set(range(len(nodes)))
-    while unscheduled:
-        ready = [i for i in unscheduled if all(name2node.get(d, {'scheduled':True})['scheduled'] for d in nodes[i]['deps'])]
-        # 按资源数分组
+    node_ready_time = {n['name']: 1 for n in nodes}
+    running = []  # (结束周期, 节点idx, 类型)
+    while unscheduled or running:
+        # 释放本周期完成的操作
+        running = [item for item in running if item[0] > cycle]
+        # 统计本周期每种门型已用资源
+        used_dict = {k: 0 for k in resource_dict}
+        for end_cyc, idx, typ in running:
+            if typ in used_dict:
+                used_dict[typ] += 1
+        # 找到所有依赖已完成且ready时间<=当前周期的未调度节点
+        ready = [i for i in unscheduled if all(node_ready_time[d] <= cycle for d in nodes[i]['deps']) and node_ready_time[nodes[i]['name']] <= cycle]
         this_cycle = []
-        used = 0
         for idx in ready:
-            if used >= resource_num:
-                break
+            n = nodes[idx]
+            op_type = n['type']
+            latency = op_latency.get(op_type, 1)
+            # 判断资源是否足够
+            if op_type in resource_dict and used_dict[op_type] >= resource_dict[op_type]:
+                continue
+            n['cycle'] = cycle
+            n['scheduled'] = True
+            node_ready_time[n['name']] = cycle + latency
+            running.append((cycle + latency, idx, op_type))
             this_cycle.append(idx)
-            used += 1
-        # 标记调度
-        for idx in this_cycle:
-            nodes[idx]['scheduled'] = True
-            nodes[idx]['cycle'] = cycle
+            if op_type in used_dict:
+                used_dict[op_type] += 1
             unscheduled.remove(idx)
         schedule.append(this_cycle)
         cycle += 1
-    # 4. 输出
+    # 3. 输出
     print(f"IInput:{module.inputs},Output:{module.outputs}")
     for i, cyc in enumerate(schedule):
         if not cyc:
@@ -153,9 +162,10 @@ def list_schedule(module, resource_num=2):
             op_type = n['type']
             if op_type == '+': op_type = 'ADD'
             elif op_type == '-': op_type = 'SUB'
-            elif op_type == '&': op_type = 'AND'
-            elif op_type == '|': op_type = 'OR'
-            elif op_type == '^': op_type = 'XOR'
+            elif op_type == 'AND': op_type = 'AND'
+            elif op_type == 'OR': op_type = 'OR'
+            elif op_type == 'XOR': op_type = 'XOR'
+            elif op_type == 'NOT': op_type = 'NOT'
             ops.append(f"{n['name']}({op_type})")
         print(f"Cycle {i+1}: {', '.join(ops)}")
 
@@ -216,7 +226,8 @@ def list_schedule_mr_lcs(module):
                 return []
             if isinstance(expr, dict):
                 op_type = expr['op']
-                if op_type in ['+', '-', '&', '|', '^']:
+                # 支持AND/OR/NOT等类型
+                if op_type in ['+', '-', 'AND', 'OR', 'XOR']:
                     left = expr['left']
                     right = expr['right']
                     left_name = left if isinstance(left, str) else f"tmp_{len(nodes)}_l"
@@ -228,7 +239,7 @@ def list_schedule_mr_lcs(module):
                     nodes_l.append(node)
                     name2node[out_name] = node
                     return nodes_l
-                elif op_type == '~':
+                elif op_type == 'NOT':
                     right = expr['right']
                     right_name = right if isinstance(right, str) else f"tmp_{len(nodes)}_r"
                     nodes_r = parse_expr(right, right_name)
@@ -249,7 +260,7 @@ def list_schedule_mr_lcs(module):
         n['deps'] = set([d for d in n['deps'] if d in outputs])
     # 2. ASAP/ALAP
     asap = asap_schedule(nodes)
-    max_cycle = max(asap.values())
+    max_cycle = max(asap.values()) if asap else 0
     alap = alap_schedule(nodes, max_cycle)
     for n in nodes:
         n['asap'] = asap[n['name']]
@@ -276,38 +287,38 @@ def list_schedule_mr_lcs(module):
                 schedule[n['asap']].append(n)
                 unscheduled.remove(n['name'])
     # 4. 输出
-    gate_type_map = {'+':'ADD', '-':'SUB', '&':'AND', '|':'OR', '^':'XOR', 'NOT':'NOT', 'AND':'AND', 'OR':'OR', 'XOR':'XOR', 'NAND':'NAND', 'NOR':'NOR', 'XNOR':'XNOR'}
+    gate_type_map = {'+':'ADD', '-':'SUB', 'AND':'AND', 'OR':'OR', 'XOR':'XOR', 'NOT':'NOT', 'NAND':'NAND', 'NOR':'NOR', 'XNOR':'XNOR'}
     print(f"Input: {', '.join(module.inputs)}")
     print(f"Output: {', '.join(module.outputs)}")
     print(f"Total {max_cycle+1} Cycles, 与门{sum(1 for n in nodes if gate_type_map.get(n['type'])=='AND')}个，或门{sum(1 for n in nodes if gate_type_map.get(n['type'])=='OR')}个，非门{sum(1 for n in nodes if gate_type_map.get(n['type'])=='NOT')}个")
     for i, cyc in enumerate(schedule):
-        ands = [n['name'] for n in cyc if gate_type_map.get(n['type'])=='AND']
-        ors = [n['name'] for n in cyc if gate_type_map.get(n['type'])=='OR']
-        nots = [n['name'] for n in cyc if gate_type_map.get(n['type'])=='NOT']
-        others = [n['name'] for n in cyc if gate_type_map.get(n['type']) not in ['AND','OR','NOT']]
-        print(f"Cycle {i}: {{{'  '.join(ands)}}}, {{{'  '.join(ors)}}}, {{{'  '.join(nots)}}}, {{{'  '.join(others)}}}")
+        ands = [f"{n['name']}({gate_type_map.get(n['type'], 'AND')})" for n in cyc if gate_type_map.get(n['type'])=='AND']
+        ors = [f"{n['name']}({gate_type_map.get(n['type'], 'OR')})" for n in cyc if gate_type_map.get(n['type'])=='OR']
+        nots = [f"{n['name']}({gate_type_map.get(n['type'], 'NOT')})" for n in cyc if gate_type_map.get(n['type'])=='NOT']
+        others = [f"{n['name']}({gate_type_map.get(n['type'], 'OTHER')})" for n in cyc if gate_type_map.get(n['type']) not in ['AND','OR','NOT']]
+        print(f"Cycle {i}: {' '.join(ands + ors + nots + others)}")
 
 if __name__ == "__main__":
-    if len(sys.argv) < 2:
-        print("用法: python verilog_to_blif.py <verilog_file> [output_blif_file] [--schedule a] [--mr-lcs]")
-        sys.exit(1)
-
-    input_file = sys.argv[1]
-    output_file = sys.argv[2] if len(sys.argv) > 2 and not sys.argv[2].startswith('--') else None
-    schedule_mode = '--schedule' in sys.argv
-    mr_lcs_mode = '--mr-lcs' in sys.argv
-    resource_num = 2
-    if schedule_mode:
-        idx = sys.argv.index('--schedule')
-        if len(sys.argv) > idx+1:
-            resource_num = int(sys.argv[idx+1])
-    parser = VerilogParser()
+    parser = argparse.ArgumentParser()
+    parser.add_argument('verilog_file')
+    parser.add_argument('--ml-rcs', action='store_true', help='使用ML-RCS调度')
+    parser.add_argument('--and', type=int, default=2, help='AND门资源数', dest='and_num')
+    parser.add_argument('--or', type=int, default=2, help='OR门资源数', dest='or_num')
+    parser.add_argument('--not', type=int, default=1, help='NOT门资源数', dest='not_num')
+    parser.add_argument('--schedule', type=int, help='兼容原有接口')
+    parser.add_argument('--mr-lcs', action='store_true')
+    args = parser.parse_args()
+    input_file = args.verilog_file
+    parser_v = VerilogParser()
     with open(input_file, 'r', encoding='utf-8') as f:
         verilog_code = f.read()
-    module = parser.parse(verilog_code)
-    if mr_lcs_mode:
+    module = parser_v.parse(verilog_code)
+    if args.mr_lcs:
         list_schedule_mr_lcs(module)
-    elif schedule_mode:
-        list_schedule(module, resource_num)
+    elif args.ml_rcs:
+        resource_dict = {'AND': args.and_num, 'OR': args.or_num, 'NOT': args.not_num}
+        list_schedule(module, resource_dict)
+    elif args.schedule:
+        list_schedule(module, {'AND': args.schedule, 'OR': args.schedule, 'NOT': args.schedule})
     else:
-        verilog_to_blif(input_file, output_file) 
+        verilog_to_blif(input_file) 

@@ -113,11 +113,11 @@ class VerilogParser:
             elif p[2] == '-':
                 p[0] = {'op': '-', 'left': p[1], 'right': p[3]}
             elif p[2] == '&':
-                p[0] = {'op': '&', 'left': p[1], 'right': p[3]}
+                p[0] = {'op': 'AND', 'left': p[1], 'right': p[3]}
             elif p[2] == '|':
-                p[0] = {'op': '|', 'left': p[1], 'right': p[3]}
+                p[0] = {'op': 'OR', 'left': p[1], 'right': p[3]}
             elif p[2] == '^':
-                p[0] = {'op': 'xor', 'left': p[1], 'right': p[3]}
+                p[0] = {'op': 'XOR', 'left': p[1], 'right': p[3]}
         elif len(p) == 6:  # 三元操作符: condition ? if_true : if_false
             p[0] = {'op': '?:', 'condition': p[1], 'if_true': p[3], 'if_false': p[5]}
             
@@ -129,7 +129,7 @@ class VerilogParser:
         if len(p) == 2:
             p[0] = p[1]
         elif len(p) == 3 and p[1] == '~':
-            p[0] = {'op': '~', 'right': p[2]}
+            p[0] = {'op': 'NOT', 'right': p[2]}
         else:
             p[0] = p[2]
             
