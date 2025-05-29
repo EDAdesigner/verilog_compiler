@@ -9,20 +9,18 @@ digraph balance {
 	out [label=out fillcolor=lightgreen shape=ellipse style=filled]
 	temp_wire_0 [label=temp_wire_0 fillcolor=lightyellow shape=box style=filled]
 	temp_wire_1 [label=temp_wire_1 fillcolor=lightyellow shape=box style=filled]
-	temp_wire_2 [label=temp_wire_2 fillcolor=lightyellow shape=box style=filled]
-	assign_temp_wire_0 [label="{{<A> a|<B> b}|{$03\nADD}|<temp_wire_0> temp_wire_0}" fillcolor=lavender shape=record style=filled]
+	assign_out [label="{{<A> temp_wire_0|<B> temp_wire_1}|{$02\nADD}|<out> out}" fillcolor=lightpink shape=record style=filled]
+	temp_wire_0 -> assign_out:A
+	temp_wire_1 -> assign_out:B
+	assign_out:out -> out
+	assign_temp_wire_0 [label="{{<A> a|<B> b}|{$03\nADD}|<temp_wire_0> temp_wire_0}" fillcolor=lightpink shape=record style=filled]
 	a -> assign_temp_wire_0:A
 	b -> assign_temp_wire_0:B
 	assign_temp_wire_0:temp_wire_0 -> temp_wire_0
-	assign_temp_wire_1 [label="{{<A> c|<B> d}|{$04\nADD}|<temp_wire_1> temp_wire_1}" fillcolor=lavender shape=record style=filled]
+	assign_temp_wire_1 [label="{{<A> c|<B> d}|{$04\nADD}|<temp_wire_1> temp_wire_1}" fillcolor=lightpink shape=record style=filled]
 	c -> assign_temp_wire_1:A
 	d -> assign_temp_wire_1:B
 	assign_temp_wire_1:temp_wire_1 -> temp_wire_1
-	assign_temp_wire_2 [label="{{<A> temp_wire_0|<B> temp_wire_1}|{$05\nADD}|<temp_wire_2> temp_wire_2}" fillcolor=lavender shape=record style=filled]
-	temp_wire_0 -> assign_temp_wire_2:A
-	temp_wire_1 -> assign_temp_wire_2:B
-	assign_temp_wire_2:temp_wire_2 -> temp_wire_2
-	temp_wire_2 -> out
 	subgraph cluster_inputs {
 		color=lightblue label=Inputs rank=source style=filled
 		a

@@ -31,7 +31,9 @@ class VerilogLexer:
         'RPAREN',     # )
         'SEMICOLON',  # ;
         'COMMA',      # ,
-        'TILDE'       # ~
+        'TILDE',
+        'OR_OP',      # |
+        'XOR_OP'      # ^
     ] + list(reserved.values())
 
     # 简单的token规则
@@ -44,6 +46,8 @@ class VerilogLexer:
     t_SEMICOLON = r';'
     t_COMMA = r','
     t_TILDE = r'~'
+    t_OR_OP = r'\|'
+    t_XOR_OP = r'\^'
 
     # 标识符规则
     def t_ID(self, t):

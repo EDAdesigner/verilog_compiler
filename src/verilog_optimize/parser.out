@@ -3,7 +3,6 @@ Created by PLY version 3.11 (http://www.dabeaz.com/ply)
 Unused terminals:
 
     MINUS
-    TILDE
 
 Grammar
 
@@ -41,10 +40,13 @@ Rule 30    assign_statement -> ASSIGN ID EQUALS expression SEMICOLON
 Rule 31    expression -> term
 Rule 32    expression -> expression PLUS term
 Rule 33    expression -> expression AMPERSAND term
-Rule 34    term -> ID
-Rule 35    term -> NUMBER
-Rule 36    term -> LPAREN expression RPAREN
-Rule 37    empty -> <empty>
+Rule 34    expression -> expression OR_OP term
+Rule 35    expression -> expression XOR_OP term
+Rule 36    expression -> TILDE term
+Rule 37    term -> ID
+Rule 38    term -> NUMBER
+Rule 39    term -> LPAREN expression RPAREN
+Rule 40    empty -> <empty>
 
 Terminals, with rules where they appear
 
@@ -55,24 +57,26 @@ BUF                  : 27
 COMMA                : 3 29
 ENDMODULE            : 1
 EQUALS               : 30
-ID                   : 1 4 19 28 29 30 34
+ID                   : 1 4 19 28 29 30 37
 INPUT                : 11
-LPAREN               : 1 19 36
+LPAREN               : 1 19 39
 MINUS                : 
 MODULE               : 1
 NAND                 : 23
 NOR                  : 24
 NOT                  : 22
-NUMBER               : 35
+NUMBER               : 38
 OR                   : 21
+OR_OP                : 34
 OUTPUT               : 12
 PLUS                 : 32
-RPAREN               : 1 19 36
+RPAREN               : 1 19 39
 SEMICOLON            : 1 11 12 13 19 30
-TILDE                : 
+TILDE                : 36
 WIRE                 : 13
 XNOR                 : 26
 XOR                  : 25
+XOR_OP               : 35
 error                : 
 
 Nonterminals, with rules where they appear
@@ -81,7 +85,7 @@ assign_statement     : 18
 declaration          : 5 6
 declarations         : 1 5
 empty                : 7 16
-expression           : 30 32 33 36
+expression           : 30 32 33 34 35 39
 gate_instantiation   : 17
 gate_type            : 19
 input_declaration    : 8
@@ -92,7 +96,7 @@ port_list            : 1 3 11 12 13
 signal_list          : 19 29
 statement            : 14 15
 statements           : 1 14
-term                 : 31 32 33
+term                 : 31 32 33 34 35 36
 wire_declaration     : 10
 
 Parsing method: LALR
@@ -192,7 +196,7 @@ state 10
     (8) declaration -> . input_declaration
     (9) declaration -> . output_declaration
     (10) declaration -> . wire_declaration
-    (37) empty -> .
+    (40) empty -> .
     (11) input_declaration -> . INPUT port_list SEMICOLON
     (12) output_declaration -> . OUTPUT port_list SEMICOLON
     (13) wire_declaration -> . WIRE port_list SEMICOLON
@@ -200,23 +204,23 @@ state 10
   ! shift/reduce conflict for INPUT resolved as shift
   ! shift/reduce conflict for OUTPUT resolved as shift
   ! shift/reduce conflict for WIRE resolved as shift
-    ASSIGN          reduce using rule 37 (empty -> .)
-    AND             reduce using rule 37 (empty -> .)
-    OR              reduce using rule 37 (empty -> .)
-    NOT             reduce using rule 37 (empty -> .)
-    NAND            reduce using rule 37 (empty -> .)
-    NOR             reduce using rule 37 (empty -> .)
-    XOR             reduce using rule 37 (empty -> .)
-    XNOR            reduce using rule 37 (empty -> .)
-    BUF             reduce using rule 37 (empty -> .)
-    ENDMODULE       reduce using rule 37 (empty -> .)
+    ASSIGN          reduce using rule 40 (empty -> .)
+    AND             reduce using rule 40 (empty -> .)
+    OR              reduce using rule 40 (empty -> .)
+    NOT             reduce using rule 40 (empty -> .)
+    NAND            reduce using rule 40 (empty -> .)
+    NOR             reduce using rule 40 (empty -> .)
+    XOR             reduce using rule 40 (empty -> .)
+    XNOR            reduce using rule 40 (empty -> .)
+    BUF             reduce using rule 40 (empty -> .)
+    ENDMODULE       reduce using rule 40 (empty -> .)
     INPUT           shift and go to state 18
     OUTPUT          shift and go to state 19
     WIRE            shift and go to state 20
 
-  ! INPUT           [ reduce using rule 37 (empty -> .) ]
-  ! OUTPUT          [ reduce using rule 37 (empty -> .) ]
-  ! WIRE            [ reduce using rule 37 (empty -> .) ]
+  ! INPUT           [ reduce using rule 40 (empty -> .) ]
+  ! OUTPUT          [ reduce using rule 40 (empty -> .) ]
+  ! WIRE            [ reduce using rule 40 (empty -> .) ]
 
     declarations                   shift and go to state 12
     declaration                    shift and go to state 13
@@ -245,7 +249,7 @@ state 12
     (10) declaration -> . wire_declaration
     (17) statement -> . gate_instantiation
     (18) statement -> . assign_statement
-    (37) empty -> .
+    (40) empty -> .
     (11) input_declaration -> . INPUT port_list SEMICOLON
     (12) output_declaration -> . OUTPUT port_list SEMICOLON
     (13) wire_declaration -> . WIRE port_list SEMICOLON
@@ -269,7 +273,7 @@ state 12
   ! shift/reduce conflict for XOR resolved as shift
   ! shift/reduce conflict for XNOR resolved as shift
   ! shift/reduce conflict for BUF resolved as shift
-    ENDMODULE       reduce using rule 37 (empty -> .)
+    ENDMODULE       reduce using rule 40 (empty -> .)
     INPUT           shift and go to state 18
     OUTPUT          shift and go to state 19
     WIRE            shift and go to state 20
@@ -283,15 +287,15 @@ state 12
     XNOR            shift and go to state 35
     BUF             shift and go to state 36
 
-  ! ASSIGN          [ reduce using rule 37 (empty -> .) ]
-  ! AND             [ reduce using rule 37 (empty -> .) ]
-  ! OR              [ reduce using rule 37 (empty -> .) ]
-  ! NOT             [ reduce using rule 37 (empty -> .) ]
-  ! NAND            [ reduce using rule 37 (empty -> .) ]
-  ! NOR             [ reduce using rule 37 (empty -> .) ]
-  ! XOR             [ reduce using rule 37 (empty -> .) ]
-  ! XNOR            [ reduce using rule 37 (empty -> .) ]
-  ! BUF             [ reduce using rule 37 (empty -> .) ]
+  ! ASSIGN          [ reduce using rule 40 (empty -> .) ]
+  ! AND             [ reduce using rule 40 (empty -> .) ]
+  ! OR              [ reduce using rule 40 (empty -> .) ]
+  ! NOT             [ reduce using rule 40 (empty -> .) ]
+  ! NAND            [ reduce using rule 40 (empty -> .) ]
+  ! NOR             [ reduce using rule 40 (empty -> .) ]
+  ! XOR             [ reduce using rule 40 (empty -> .) ]
+  ! XNOR            [ reduce using rule 40 (empty -> .) ]
+  ! BUF             [ reduce using rule 40 (empty -> .) ]
 
     statements                     shift and go to state 21
     declaration                    shift and go to state 22
@@ -752,13 +756,17 @@ state 48
     (31) expression -> . term
     (32) expression -> . expression PLUS term
     (33) expression -> . expression AMPERSAND term
-    (34) term -> . ID
-    (35) term -> . NUMBER
-    (36) term -> . LPAREN expression RPAREN
+    (34) expression -> . expression OR_OP term
+    (35) expression -> . expression XOR_OP term
+    (36) expression -> . TILDE term
+    (37) term -> . ID
+    (38) term -> . NUMBER
+    (39) term -> . LPAREN expression RPAREN
 
+    TILDE           shift and go to state 54
     ID              shift and go to state 51
-    NUMBER          shift and go to state 54
-    LPAREN          shift and go to state 55
+    NUMBER          shift and go to state 55
+    LPAREN          shift and go to state 56
 
     expression                     shift and go to state 52
     term                           shift and go to state 53
@@ -769,24 +777,26 @@ state 49
     (29) signal_list -> ID . COMMA signal_list
 
     RPAREN          reduce using rule 28 (signal_list -> ID .)
-    COMMA           shift and go to state 56
+    COMMA           shift and go to state 57
 
 
 state 50
 
     (19) gate_instantiation -> gate_type ID LPAREN signal_list . RPAREN SEMICOLON
 
-    RPAREN          shift and go to state 57
+    RPAREN          shift and go to state 58
 
 
 state 51
 
-    (34) term -> ID .
+    (37) term -> ID .
 
-    SEMICOLON       reduce using rule 34 (term -> ID .)
-    PLUS            reduce using rule 34 (term -> ID .)
-    AMPERSAND       reduce using rule 34 (term -> ID .)
-    RPAREN          reduce using rule 34 (term -> ID .)
+    SEMICOLON       reduce using rule 37 (term -> ID .)
+    PLUS            reduce using rule 37 (term -> ID .)
+    AMPERSAND       reduce using rule 37 (term -> ID .)
+    OR_OP           reduce using rule 37 (term -> ID .)
+    XOR_OP          reduce using rule 37 (term -> ID .)
+    RPAREN          reduce using rule 37 (term -> ID .)
 
 
 state 52
@@ -794,10 +804,14 @@ state 52
     (30) assign_statement -> ASSIGN ID EQUALS expression . SEMICOLON
     (32) expression -> expression . PLUS term
     (33) expression -> expression . AMPERSAND term
+    (34) expression -> expression . OR_OP term
+    (35) expression -> expression . XOR_OP term
 
-    SEMICOLON       shift and go to state 58
-    PLUS            shift and go to state 59
-    AMPERSAND       shift and go to state 60
+    SEMICOLON       shift and go to state 59
+    PLUS            shift and go to state 60
+    AMPERSAND       shift and go to state 61
+    OR_OP           shift and go to state 62
+    XOR_OP          shift and go to state 63
 
 
 state 53
@@ -807,37 +821,58 @@ state 53
     SEMICOLON       reduce using rule 31 (expression -> term .)
     PLUS            reduce using rule 31 (expression -> term .)
     AMPERSAND       reduce using rule 31 (expression -> term .)
+    OR_OP           reduce using rule 31 (expression -> term .)
+    XOR_OP          reduce using rule 31 (expression -> term .)
     RPAREN          reduce using rule 31 (expression -> term .)
 
 
 state 54
 
-    (35) term -> NUMBER .
+    (36) expression -> TILDE . term
+    (37) term -> . ID
+    (38) term -> . NUMBER
+    (39) term -> . LPAREN expression RPAREN
 
-    SEMICOLON       reduce using rule 35 (term -> NUMBER .)
-    PLUS            reduce using rule 35 (term -> NUMBER .)
-    AMPERSAND       reduce using rule 35 (term -> NUMBER .)
-    RPAREN          reduce using rule 35 (term -> NUMBER .)
+    ID              shift and go to state 51
+    NUMBER          shift and go to state 55
+    LPAREN          shift and go to state 56
 
+    term                           shift and go to state 64
 
 state 55
 
-    (36) term -> LPAREN . expression RPAREN
+    (38) term -> NUMBER .
+
+    SEMICOLON       reduce using rule 38 (term -> NUMBER .)
+    PLUS            reduce using rule 38 (term -> NUMBER .)
+    AMPERSAND       reduce using rule 38 (term -> NUMBER .)
+    OR_OP           reduce using rule 38 (term -> NUMBER .)
+    XOR_OP          reduce using rule 38 (term -> NUMBER .)
+    RPAREN          reduce using rule 38 (term -> NUMBER .)
+
+
+state 56
+
+    (39) term -> LPAREN . expression RPAREN
     (31) expression -> . term
     (32) expression -> . expression PLUS term
     (33) expression -> . expression AMPERSAND term
-    (34) term -> . ID
-    (35) term -> . NUMBER
-    (36) term -> . LPAREN expression RPAREN
+    (34) expression -> . expression OR_OP term
+    (35) expression -> . expression XOR_OP term
+    (36) expression -> . TILDE term
+    (37) term -> . ID
+    (38) term -> . NUMBER
+    (39) term -> . LPAREN expression RPAREN
 
+    TILDE           shift and go to state 54
     ID              shift and go to state 51
-    NUMBER          shift and go to state 54
-    LPAREN          shift and go to state 55
+    NUMBER          shift and go to state 55
+    LPAREN          shift and go to state 56
 
-    expression                     shift and go to state 61
+    expression                     shift and go to state 65
     term                           shift and go to state 53
 
-state 56
+state 57
 
     (29) signal_list -> ID COMMA . signal_list
     (28) signal_list -> . ID
@@ -845,16 +880,16 @@ state 56
 
     ID              shift and go to state 49
 
-    signal_list                    shift and go to state 62
+    signal_list                    shift and go to state 66
 
-state 57
+state 58
 
     (19) gate_instantiation -> gate_type ID LPAREN signal_list RPAREN . SEMICOLON
 
-    SEMICOLON       shift and go to state 63
+    SEMICOLON       shift and go to state 67
 
 
-state 58
+state 59
 
     (30) assign_statement -> ASSIGN ID EQUALS expression SEMICOLON .
 
@@ -870,51 +905,93 @@ state 58
     BUF             reduce using rule 30 (assign_statement -> ASSIGN ID EQUALS expression SEMICOLON .)
 
 
-state 59
-
-    (32) expression -> expression PLUS . term
-    (34) term -> . ID
-    (35) term -> . NUMBER
-    (36) term -> . LPAREN expression RPAREN
-
-    ID              shift and go to state 51
-    NUMBER          shift and go to state 54
-    LPAREN          shift and go to state 55
-
-    term                           shift and go to state 64
-
 state 60
 
-    (33) expression -> expression AMPERSAND . term
-    (34) term -> . ID
-    (35) term -> . NUMBER
-    (36) term -> . LPAREN expression RPAREN
+    (32) expression -> expression PLUS . term
+    (37) term -> . ID
+    (38) term -> . NUMBER
+    (39) term -> . LPAREN expression RPAREN
 
     ID              shift and go to state 51
-    NUMBER          shift and go to state 54
-    LPAREN          shift and go to state 55
+    NUMBER          shift and go to state 55
+    LPAREN          shift and go to state 56
 
-    term                           shift and go to state 65
+    term                           shift and go to state 68
 
 state 61
 
-    (36) term -> LPAREN expression . RPAREN
-    (32) expression -> expression . PLUS term
-    (33) expression -> expression . AMPERSAND term
+    (33) expression -> expression AMPERSAND . term
+    (37) term -> . ID
+    (38) term -> . NUMBER
+    (39) term -> . LPAREN expression RPAREN
 
-    RPAREN          shift and go to state 66
-    PLUS            shift and go to state 59
-    AMPERSAND       shift and go to state 60
+    ID              shift and go to state 51
+    NUMBER          shift and go to state 55
+    LPAREN          shift and go to state 56
 
+    term                           shift and go to state 69
 
 state 62
+
+    (34) expression -> expression OR_OP . term
+    (37) term -> . ID
+    (38) term -> . NUMBER
+    (39) term -> . LPAREN expression RPAREN
+
+    ID              shift and go to state 51
+    NUMBER          shift and go to state 55
+    LPAREN          shift and go to state 56
+
+    term                           shift and go to state 70
+
+state 63
+
+    (35) expression -> expression XOR_OP . term
+    (37) term -> . ID
+    (38) term -> . NUMBER
+    (39) term -> . LPAREN expression RPAREN
+
+    ID              shift and go to state 51
+    NUMBER          shift and go to state 55
+    LPAREN          shift and go to state 56
+
+    term                           shift and go to state 71
+
+state 64
+
+    (36) expression -> TILDE term .
+
+    SEMICOLON       reduce using rule 36 (expression -> TILDE term .)
+    PLUS            reduce using rule 36 (expression -> TILDE term .)
+    AMPERSAND       reduce using rule 36 (expression -> TILDE term .)
+    OR_OP           reduce using rule 36 (expression -> TILDE term .)
+    XOR_OP          reduce using rule 36 (expression -> TILDE term .)
+    RPAREN          reduce using rule 36 (expression -> TILDE term .)
+
+
+state 65
+
+    (39) term -> LPAREN expression . RPAREN
+    (32) expression -> expression . PLUS term
+    (33) expression -> expression . AMPERSAND term
+    (34) expression -> expression . OR_OP term
+    (35) expression -> expression . XOR_OP term
+
+    RPAREN          shift and go to state 72
+    PLUS            shift and go to state 60
+    AMPERSAND       shift and go to state 61
+    OR_OP           shift and go to state 62
+    XOR_OP          shift and go to state 63
+
+
+state 66
 
     (29) signal_list -> ID COMMA signal_list .
 
     RPAREN          reduce using rule 29 (signal_list -> ID COMMA signal_list .)
 
 
-state 63
+state 67
 
     (19) gate_instantiation -> gate_type ID LPAREN signal_list RPAREN SEMICOLON .
 
@@ -930,34 +1007,64 @@ state 63
     BUF             reduce using rule 19 (gate_instantiation -> gate_type ID LPAREN signal_list RPAREN SEMICOLON .)
 
 
-state 64
+state 68
 
     (32) expression -> expression PLUS term .
 
     SEMICOLON       reduce using rule 32 (expression -> expression PLUS term .)
     PLUS            reduce using rule 32 (expression -> expression PLUS term .)
     AMPERSAND       reduce using rule 32 (expression -> expression PLUS term .)
+    OR_OP           reduce using rule 32 (expression -> expression PLUS term .)
+    XOR_OP          reduce using rule 32 (expression -> expression PLUS term .)
     RPAREN          reduce using rule 32 (expression -> expression PLUS term .)
 
 
-state 65
+state 69
 
     (33) expression -> expression AMPERSAND term .
 
     SEMICOLON       reduce using rule 33 (expression -> expression AMPERSAND term .)
     PLUS            reduce using rule 33 (expression -> expression AMPERSAND term .)
     AMPERSAND       reduce using rule 33 (expression -> expression AMPERSAND term .)
+    OR_OP           reduce using rule 33 (expression -> expression AMPERSAND term .)
+    XOR_OP          reduce using rule 33 (expression -> expression AMPERSAND term .)
     RPAREN          reduce using rule 33 (expression -> expression AMPERSAND term .)
 
 
-state 66
+state 70
 
-    (36) term -> LPAREN expression RPAREN .
+    (34) expression -> expression OR_OP term .
 
-    SEMICOLON       reduce using rule 36 (term -> LPAREN expression RPAREN .)
-    PLUS            reduce using rule 36 (term -> LPAREN expression RPAREN .)
-    AMPERSAND       reduce using rule 36 (term -> LPAREN expression RPAREN .)
-    RPAREN          reduce using rule 36 (term -> LPAREN expression RPAREN .)
+    SEMICOLON       reduce using rule 34 (expression -> expression OR_OP term .)
+    PLUS            reduce using rule 34 (expression -> expression OR_OP term .)
+    AMPERSAND       reduce using rule 34 (expression -> expression OR_OP term .)
+    OR_OP           reduce using rule 34 (expression -> expression OR_OP term .)
+    XOR_OP          reduce using rule 34 (expression -> expression OR_OP term .)
+    RPAREN          reduce using rule 34 (expression -> expression OR_OP term .)
+
+
+state 71
+
+    (35) expression -> expression XOR_OP term .
+
+    SEMICOLON       reduce using rule 35 (expression -> expression XOR_OP term .)
+    PLUS            reduce using rule 35 (expression -> expression XOR_OP term .)
+    AMPERSAND       reduce using rule 35 (expression -> expression XOR_OP term .)
+    OR_OP           reduce using rule 35 (expression -> expression XOR_OP term .)
+    XOR_OP          reduce using rule 35 (expression -> expression XOR_OP term .)
+    RPAREN          reduce using rule 35 (expression -> expression XOR_OP term .)
+
+
+state 72
+
+    (39) term -> LPAREN expression RPAREN .
+
+    SEMICOLON       reduce using rule 39 (term -> LPAREN expression RPAREN .)
+    PLUS            reduce using rule 39 (term -> LPAREN expression RPAREN .)
+    AMPERSAND       reduce using rule 39 (term -> LPAREN expression RPAREN .)
+    OR_OP           reduce using rule 39 (term -> LPAREN expression RPAREN .)
+    XOR_OP          reduce using rule 39 (term -> LPAREN expression RPAREN .)
+    RPAREN          reduce using rule 39 (term -> LPAREN expression RPAREN .)
 
 WARNING: 
 WARNING: Conflicts:

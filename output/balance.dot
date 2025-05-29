@@ -6,19 +6,22 @@ digraph unbalanced_add4 {
 	b [label=b fillcolor=lightblue shape=ellipse style=filled]
 	c [label=c fillcolor=lightblue shape=ellipse style=filled]
 	d [label=d fillcolor=lightblue shape=ellipse style=filled]
+	out [label=out fillcolor=lightblue shape=ellipse style=filled]
+	a [label=a fillcolor=lightblue shape=ellipse style=filled]
+	b [label=b fillcolor=lightblue shape=ellipse style=filled]
+	c [label=c fillcolor=lightblue shape=ellipse style=filled]
+	d [label=d fillcolor=lightblue shape=ellipse style=filled]
 	out [label=out fillcolor=lightgreen shape=ellipse style=filled]
-	assign_out_L1_L2 [label="{{<A> a|<B> b}|{$03\nADD}|<assign_out_L1_L2> assign_out_L1_L2}" fillcolor=lavender shape=record style=filled]
-	a -> assign_out_L1_L2:A
-	b -> assign_out_L1_L2:B
-	assign_out_L1 [label="{{<A> assign_out_L1_L2|<B> c}|{$02\nADD}|<assign_out_L1> assign_out_L1}" fillcolor=lavender shape=record style=filled]
-	assign_out_L1_L2 -> assign_out_L1:A
-	c -> assign_out_L1:B
-	assign_out [label="{{<A> assign_out_L1|<B> d}|{$00\nADD}|<out> out}" fillcolor=lavender shape=record style=filled]
-	assign_out_L1 -> assign_out:A
+	assign_out [label="{{<A> left|<B> d}|{$00\nADD}|<out> out}" fillcolor=lightpink shape=record style=filled]
 	d -> assign_out:B
 	assign_out:out -> out
 	subgraph cluster_inputs {
 		color=lightblue label=Inputs rank=source style=filled
+		a
+		b
+		c
+		d
+		out
 		a
 		b
 		c
