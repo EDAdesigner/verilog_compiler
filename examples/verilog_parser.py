@@ -24,12 +24,8 @@ class VerilogModule:
                 self.inputs.append(name)
             elif type == 'output':
                 self.outputs.append(name)
-            elif type == 'wire':
+            else: # 'unknown' 或 'wire'
                 self.wires.append(name)
-            else: # 'unknown'
-                # 如果在端口列表中出现但没有input/output/wire声明，默认为wire
-                if name not in self.wires:
-                     self.wires.append(name)
 
 class Gate:
     def __init__(self, gate_type, name, inputs, output):
@@ -58,7 +54,7 @@ class VerilogParser:
         '''module_definition : MODULE ID LPAREN port_list RPAREN SEMICOLON module_items ENDMODULE'''
         self.module.name = p[2]
         # 获取原始端口列表 (p[4] 现在只包含名称列表)
-        # original_ports = p[4] # 这一行不需要了，p[4]是port_list_items的结果，我们已经直接更新到self.module.ports
+        original_ports = p[4]
 
         # 在解析完所有 module_items 后，根据 ports 字典填充 inputs, outputs, wires 列表
         self.module.finalize_ports()
@@ -67,36 +63,32 @@ class VerilogParser:
         
     def p_port_list(self, p):
         '''port_list : port_list_items'''
-        # port_list_items 的动作已经更新了 self.module.ports，这里只需 pass
-        pass
+        p[0] = p[1] # port_list 的值就是 port_list_items 返回的列表
         
     def p_port_list_items(self, p):
         '''port_list_items : port_item
                          | port_list_items COMMA port_item'''
-        # port_item 的动作已经更新了 self.module.ports，这里只需 pass
-        pass
+        if len(p) == 2:
+            p[0] = p[1]
+        else:
+            p[0] = p[1] + p[3]
         
     def p_port_item(self, p):
         '''port_item : ID
                      | WIRE ID'''
         if len(p) == 2:
-            # 记录端口名，类型暂时未知 (如果在端口列表出现但无声明，默认为 wire)
-            if p[1] not in self.module.ports:
-                self.module.ports[p[1]] = 'unknown' # 或者更明确一点，初始可以设置为 wire
-
-        else: # WIRE ID - wire 声明应该在 module_items 中处理，这里是端口列表，不应该有 WIRE 关键字
-             # 记录端口名，类型暂时未知
-             if p[2] not in self.module.ports:
-                 self.module.ports[p[2]] = 'unknown' # Initial type can be wire or unknown
-
-        # p[0] = [p[1]] 或 [p[2]] - 这里不需要返回列表，信息已记录到 self.module.ports
-        pass
+            # 记录端口名，类型暂时未知
+            self.module.ports[p[1]] = 'unknown'
+            p[0] = [p[1]]
+        else: # WIRE ID
+            # 记录端口名，类型暂时未知
+            self.module.ports[p[2]] = 'unknown'
+            p[0] = [p[2]] # 忽略 WIRE 关键字，只返回 ID
 
     def p_module_items(self, p):
         '''module_items : module_item
                        | module_items module_item
                        | empty'''
-        # 不需要返回值，所有信息都存储在module对象中
         pass
         
     def p_module_item(self, p):
@@ -105,13 +97,12 @@ class VerilogParser:
                       | wire_declaration
                       | assign_statement
                       | gate_instantiation'''
-        # 不需要返回值，所有信息都存储在module对象中
         pass
         
     def p_input_declaration(self, p):
         '''input_declaration : INPUT input_list SEMICOLON
                            | INPUT WIRE input_list SEMICOLON'''
-        # input_list 的规则已经处理了端口类型的更新
+        # input_list 的规则已经处理了端口类型的更新，这里只需 pass
         pass
 
     def p_input_list(self, p):
@@ -120,15 +111,16 @@ class VerilogParser:
         if len(p) == 2:
             # 记录输入端口名，并更新类型
             self.module.ports[p[1]] = 'input'
+            p[0] = [p[1]]
         else:
             # 记录输入端口名，并更新类型
             self.module.ports[p[3]] = 'input'
-        pass
+            p[0] = p[1] + [p[3]]
             
     def p_output_declaration(self, p):
         '''output_declaration : OUTPUT output_list SEMICOLON
                               | OUTPUT WIRE output_list SEMICOLON'''
-        # output_list 的规则已经处理了端口类型的更新
+        # output_list 的规则已经处理了端口类型的更新，这里只需 pass
         pass
 
     def p_output_list(self, p):
@@ -137,44 +129,27 @@ class VerilogParser:
         if len(p) == 2:
             # 记录输出端口名，并更新类型
             self.module.ports[p[1]] = 'output'
+            p[0] = [p[1]]
         else:
             # 记录输出端口名，并更新类型
             self.module.ports[p[3]] = 'output'
-        pass
+            p[0] = p[1] + [p[3]]
             
     def p_wire_declaration(self, p):
         '''wire_declaration : WIRE wire_list SEMICOLON'''
-        # 确保wire_list中的所有标识符都被正确添加到wires列表中
         pass
-
+        
     def p_wire_list(self, p):
         '''wire_list : ID
                     | wire_list COMMA ID'''
         if len(p) == 2:
-            # 如果是单个ID
-            wire_name = p[1]
-            if wire_name not in self.module.wires:
-                self.module.wires.append(wire_name)
-                # 更新ports字典中的类型
-                self.module.ports[wire_name] = 'wire'
+            self.module.wires.append(p[1])
         else:
-            # 如果是wire_list COMMA ID
-            wire_name = p[3]
-            if wire_name not in self.module.wires:
-                self.module.wires.append(wire_name)
-                # 更新ports字典中的类型
-                self.module.ports[wire_name] = 'wire'
-        pass
-
+            self.module.wires.append(p[3])
+            
     def p_assign_statement(self, p):
         '''assign_statement : ASSIGN ID EQUALS expression SEMICOLON'''
-        left = p[2]
-        # 检查左侧是否是已声明的wire或output
-        if left not in self.module.wires and left not in self.module.outputs:
-            # 如果左侧不是已声明的wire或output，自动将其添加为wire
-            self.module.wires.append(left)
-            self.module.ports[left] = 'wire'
-        self.module.assigns.append(Assignment(left, p[4]))
+        self.module.assigns.append(Assignment(p[2], p[4]))
         
     def p_expression(self, p):
         '''expression : term
@@ -252,10 +227,7 @@ class VerilogParser:
             
     def parse(self, data, module_name=None):
         self.module = VerilogModule(module_name or "default_module")
-        # 在解析之前清空 ports 字典
-        self.module.ports = {}
         result = self.parser.parse(data, lexer=self.lexer)
-        # finalize_ports 现在在 p_module_definition 中调用
         return self.module
 
 def process_verilog(input_file, optimize=True):

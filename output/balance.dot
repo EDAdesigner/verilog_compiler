@@ -6,29 +6,22 @@ digraph unbalanced_add4 {
 	b [label=b fillcolor=lightblue shape=ellipse style=filled]
 	c [label=c fillcolor=lightblue shape=ellipse style=filled]
 	d [label=d fillcolor=lightblue shape=ellipse style=filled]
-	out [label=out fillcolor=lightblue shape=ellipse style=filled]
-	a [label=a fillcolor=lightblue shape=ellipse style=filled]
-	b [label=b fillcolor=lightblue shape=ellipse style=filled]
-	c [label=c fillcolor=lightblue shape=ellipse style=filled]
-	d [label=d fillcolor=lightblue shape=ellipse style=filled]
-	out [label=out fillcolor=lightgreen shape=ellipse style=filled]
-	assign_out [label="{{<A> left|<B> d}|{$00\nADD}|<out> out}" fillcolor=lightpink shape=record style=filled]
-	d -> assign_out:B
-	assign_out:out -> out
+	out [label=out fillcolor=lightyellow shape=box style=filled]
+	op_ADD_03 [label="{{<A> left|<B> right}|{03\nADD}|<out> ADD_out}" fillcolor=lightpink shape=record style=filled]
+	a -> op_ADD_03:A
+	b -> op_ADD_03:B
+	op_ADD_02 [label="{{<A> left|<B> right}|{03\nADD}|<out> ADD_out}" fillcolor=lightpink shape=record style=filled]
+	op_ADD_03:out -> op_ADD_02:A
+	c -> op_ADD_02:B
+	op_ADD_01 [label="{{<A> left|<B> right}|{03\nADD}|<out> ADD_out}" fillcolor=lightpink shape=record style=filled]
+	op_ADD_02:out -> op_ADD_01:A
+	d -> op_ADD_01:B
+	op_ADD_01:out -> out
 	subgraph cluster_inputs {
 		color=lightblue label=Inputs rank=source style=filled
 		a
 		b
 		c
 		d
-		out
-		a
-		b
-		c
-		d
-	}
-	subgraph cluster_outputs {
-		color=lightgreen label=Outputs rank=sink style=filled
-		out
 	}
 }

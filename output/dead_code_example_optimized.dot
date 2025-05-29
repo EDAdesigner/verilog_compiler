@@ -12,29 +12,21 @@ digraph dead_code_example {
 	temp_wire_0 [label=temp_wire_0 fillcolor=lightyellow shape=box style=filled]
 	temp_wire_1 [label=temp_wire_1 fillcolor=lightyellow shape=box style=filled]
 	temp_wire_2 [label=temp_wire_2 fillcolor=lightyellow shape=box style=filled]
-	assign_y [label="{<A> w3|{$06\nBUF}|<y> y}" fillcolor=lavender shape=record style=filled]
-	w3 -> assign_y:A
-	assign_y:y -> y
-	assign_w3 [label="{<A> temp_wire_2|{$07\nBUF}|<w3> w3}" fillcolor=lavender shape=record style=filled]
-	temp_wire_2 -> assign_w3:A
-	assign_w3:w3 -> w3
-	assign_temp_wire_2 [label="{{<B> w2}|{$08\nNOT}|<temp_wire_2> temp_wire_2}" fillcolor=lightpink shape=record style=filled]
-	w2 -> assign_temp_wire_2:A
-	assign_temp_wire_2:temp_wire_2 -> temp_wire_2
-	assign_w2 [label="{<A> temp_wire_1|{$09\nBUF}|<w2> w2}" fillcolor=lavender shape=record style=filled]
-	temp_wire_1 -> assign_w2:A
-	assign_w2:w2 -> w2
-	assign_temp_wire_1 [label="{{<A> w1|<B> c}|{$10\nOR}|<temp_wire_1> temp_wire_1}" fillcolor=lightpink shape=record style=filled]
-	w1 -> assign_temp_wire_1:A
-	c -> assign_temp_wire_1:B
-	assign_temp_wire_1:temp_wire_1 -> temp_wire_1
-	assign_w1 [label="{<A> temp_wire_0|{$11\nBUF}|<w1> w1}" fillcolor=lavender shape=record style=filled]
-	temp_wire_0 -> assign_w1:A
-	assign_w1:w1 -> w1
-	assign_temp_wire_0 [label="{{<A> a|<B> b}|{$12\nAND}|<temp_wire_0> temp_wire_0}" fillcolor=lightpink shape=record style=filled]
-	a -> assign_temp_wire_0:A
-	b -> assign_temp_wire_0:B
-	assign_temp_wire_0:temp_wire_0 -> temp_wire_0
+	w3 -> y
+	temp_wire_2 -> w3
+	op_NOT_06 [label="{{<A> right}|{06\nNOT}|<out> NOT_out}" fillcolor=lightpink shape=record style=filled]
+	w2 -> op_NOT_06:A
+	op_NOT_06:out -> temp_wire_2
+	temp_wire_1 -> w2
+	op_OR_07 [label="{{<A> left|<B> right}|{07\nOR}|<out> OR_out}" fillcolor=lightpink shape=record style=filled]
+	w1 -> op_OR_07:A
+	c -> op_OR_07:B
+	op_OR_07:out -> temp_wire_1
+	temp_wire_0 -> w1
+	op_AND_08 [label="{{<A> left|<B> right}|{08\nAND}|<out> AND_out}" fillcolor=lightpink shape=record style=filled]
+	a -> op_AND_08:A
+	b -> op_AND_08:B
+	op_AND_08:out -> temp_wire_0
 	subgraph cluster_inputs {
 		color=lightblue label=Inputs rank=source style=filled
 		a
