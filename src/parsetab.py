@@ -6,9 +6,9 @@ _tabversion = '3.10'
 
 _lr_method = 'LALR'
 
-_lr_signature = 'AMPERSAND AND ASSIGN BAR BUF CARET COLON COMMA DIVIDE DOT ENDMODULE EQUALS ID INPUT LBRACE LBRACKET LPAREN MINUS MODULE NAND NOR NOT NUMBER OR OUTPUT PLUS QUESTION RBRACE RBRACKET REG RPAREN SEMICOLON TILDE TIMES WIRE XNOR XORmodule_definition : MODULE ID LPAREN port_list RPAREN SEMICOLON module_items ENDMODULEport_list : port_list_itemsport_list_items : ID\n                         | port_list_items COMMA IDmodule_items : module_item\n                       | module_items module_item\n                       | emptymodule_item : input_declaration\n                      | output_declaration\n                      | wire_declaration\n                      | assign_statement\n                      | gate_instantiationinput_declaration : INPUT input_list SEMICOLONinput_list : ID\n                     | input_list COMMA IDoutput_declaration : OUTPUT ID SEMICOLONwire_declaration : WIRE wire_list SEMICOLONwire_list : ID\n                    | wire_list COMMA IDassign_statement : ASSIGN ID EQUALS expression SEMICOLONexpression : term\n                     | expression PLUS term\n                     | expression MINUS term\n                     | expression AMPERSAND term\n                     | expression BAR term\n                     | expression CARET term\n                     | term QUESTION expression COLON expressionterm : ID\n               | NUMBER\n               | LPAREN expression RPAREN\n               | TILDE termempty :gate_instantiation : gate_type ID LPAREN signal_list RPAREN SEMICOLONgate_type : AND\n                    | OR\n                    | NOT\n                    | NAND\n                    | NOR\n                    | XOR\n                    | XNOR\n                    | BUFsignal_list : ID\n                      | signal_list COMMA ID'
+_lr_signature = 'AMPERSAND AND ASSIGN BAR BUF CARET COLON COMMA DIVIDE DOT ENDMODULE EQUALS ID INPUT LBRACE LBRACKET LPAREN MINUS MODULE NAND NOR NOT NUMBER OR OUTPUT PLUS QUESTION RBRACE RBRACKET REG RPAREN SEMICOLON TILDE TIMES WIRE XNOR XORmodule_definition : MODULE ID LPAREN port_list RPAREN SEMICOLON module_items ENDMODULEport_list : port_list_itemsport_list_items : ID\n                         | port_list_items COMMA ID\n                         | WIRE ID\n                         | port_list_items COMMA WIRE IDmodule_items : module_item\n                       | module_items module_item\n                       | emptymodule_item : input_declaration\n                      | output_declaration\n                      | wire_declaration\n                      | assign_statement\n                      | gate_instantiationinput_declaration : INPUT input_list SEMICOLON\n                           | INPUT WIRE input_list SEMICOLONinput_list : ID\n                     | input_list COMMA IDoutput_declaration : OUTPUT ID SEMICOLONwire_declaration : WIRE wire_list SEMICOLONwire_list : ID\n                    | wire_list COMMA IDassign_statement : ASSIGN ID EQUALS expression SEMICOLONexpression : term\n                     | expression PLUS term\n                     | expression MINUS term\n                     | expression AMPERSAND term\n                     | expression BAR term\n                     | expression CARET term\n                     | term QUESTION expression COLON expressionterm : ID\n               | NUMBER\n               | LPAREN expression RPAREN\n               | TILDE termempty :gate_instantiation : gate_type ID LPAREN signal_list RPAREN SEMICOLONgate_type : AND\n                    | OR\n                    | NOT\n                    | NAND\n                    | NOR\n                    | XOR\n                    | XNOR\n                    | BUFsignal_list : ID\n                      | signal_list COMMA ID'
     
-_lr_action_items = {'MODULE':([0,],[2,]),'$end':([1,33,],[0,-1,]),'ID':([2,4,9,20,21,22,23,24,25,26,27,28,29,30,31,32,43,46,47,48,55,56,60,61,62,63,64,65,69,79,],[3,5,11,36,37,39,40,41,-34,-35,-36,-37,-38,-39,-40,-41,49,50,51,57,51,51,51,51,51,51,51,51,78,51,]),'LPAREN':([3,41,47,55,56,60,61,62,63,64,65,79,],[4,48,55,55,55,55,55,55,55,55,55,55,]),'COMMA':([5,7,11,35,36,38,39,49,50,57,58,78,],[-3,9,-4,43,-14,46,-18,-15,-19,-42,69,-43,]),'RPAREN':([5,6,7,11,51,53,54,57,58,66,67,70,71,72,73,74,76,78,80,],[-3,8,-2,-4,-28,-21,-29,-42,68,76,-31,-22,-23,-24,-25,-26,-30,-43,-27,]),'SEMICOLON':([8,35,36,37,38,39,49,50,51,52,53,54,67,68,70,71,72,73,74,76,80,],[10,42,-14,44,45,-18,-15,-19,-28,59,-21,-29,-31,77,-22,-23,-24,-25,-26,-30,-27,]),'ENDMODULE':([10,12,13,14,15,16,17,18,19,34,42,44,45,59,77,],[-32,33,-5,-7,-8,-9,-10,-11,-12,-6,-13,-16,-17,-20,-33,]),'INPUT':([10,12,13,14,15,16,17,18,19,34,42,44,45,59,77,],[20,20,-5,-7,-8,-9,-10,-11,-12,-6,-13,-16,-17,-20,-33,]),'OUTPUT':([10,12,13,14,15,16,17,18,19,34,42,44,45,59,77,],[21,21,-5,-7,-8,-9,-10,-11,-12,-6,-13,-16,-17,-20,-33,]),'WIRE':([10,12,13,14,15,16,17,18,19,34,42,44,45,59,77,],[22,22,-5,-7,-8,-9,-10,-11,-12,-6,-13,-16,-17,-20,-33,]),'ASSIGN':([10,12,13,14,15,16,17,18,19,34,42,44,45,59,77,],[23,23,-5,-7,-8,-9,-10,-11,-12,-6,-13,-16,-17,-20,-33,]),'AND':([10,12,13,14,15,16,17,18,19,34,42,44,45,59,77,],[25,25,-5,-7,-8,-9,-10,-11,-12,-6,-13,-16,-17,-20,-33,]),'OR':([10,12,13,14,15,16,17,18,19,34,42,44,45,59,77,],[26,26,-5,-7,-8,-9,-10,-11,-12,-6,-13,-16,-17,-20,-33,]),'NOT':([10,12,13,14,15,16,17,18,19,34,42,44,45,59,77,],[27,27,-5,-7,-8,-9,-10,-11,-12,-6,-13,-16,-17,-20,-33,]),'NAND':([10,12,13,14,15,16,17,18,19,34,42,44,45,59,77,],[28,28,-5,-7,-8,-9,-10,-11,-12,-6,-13,-16,-17,-20,-33,]),'NOR':([10,12,13,14,15,16,17,18,19,34,42,44,45,59,77,],[29,29,-5,-7,-8,-9,-10,-11,-12,-6,-13,-16,-17,-20,-33,]),'XOR':([10,12,13,14,15,16,17,18,19,34,42,44,45,59,77,],[30,30,-5,-7,-8,-9,-10,-11,-12,-6,-13,-16,-17,-20,-33,]),'XNOR':([10,12,13,14,15,16,17,18,19,34,42,44,45,59,77,],[31,31,-5,-7,-8,-9,-10,-11,-12,-6,-13,-16,-17,-20,-33,]),'BUF':([10,12,13,14,15,16,17,18,19,34,42,44,45,59,77,],[32,32,-5,-7,-8,-9,-10,-11,-12,-6,-13,-16,-17,-20,-33,]),'EQUALS':([40,],[47,]),'NUMBER':([47,55,56,60,61,62,63,64,65,79,],[54,54,54,54,54,54,54,54,54,54,]),'TILDE':([47,55,56,60,61,62,63,64,65,79,],[56,56,56,56,56,56,56,56,56,56,]),'QUESTION':([51,53,54,67,76,],[-28,65,-29,-31,-30,]),'PLUS':([51,52,53,54,66,67,70,71,72,73,74,75,76,80,],[-28,60,-21,-29,60,-31,-22,-23,-24,-25,-26,60,-30,60,]),'MINUS':([51,52,53,54,66,67,70,71,72,73,74,75,76,80,],[-28,61,-21,-29,61,-31,-22,-23,-24,-25,-26,61,-30,61,]),'AMPERSAND':([51,52,53,54,66,67,70,71,72,73,74,75,76,80,],[-28,62,-21,-29,62,-31,-22,-23,-24,-25,-26,62,-30,62,]),'BAR':([51,52,53,54,66,67,70,71,72,73,74,75,76,80,],[-28,63,-21,-29,63,-31,-22,-23,-24,-25,-26,63,-30,63,]),'CARET':([51,52,53,54,66,67,70,71,72,73,74,75,76,80,],[-28,64,-21,-29,64,-31,-22,-23,-24,-25,-26,64,-30,64,]),'COLON':([51,53,54,67,70,71,72,73,74,75,76,80,],[-28,-21,-29,-31,-22,-23,-24,-25,-26,79,-30,-27,]),}
+_lr_action_items = {'MODULE':([0,],[2,]),'$end':([1,37,],[0,-1,]),'ID':([2,4,8,10,14,23,24,25,26,27,28,29,30,31,32,33,34,35,40,48,51,53,54,62,63,67,68,69,70,71,72,76,86,],[3,5,11,13,36,41,43,44,45,46,-37,-38,-39,-40,-41,-42,-43,-44,41,55,57,58,64,58,58,58,58,58,58,58,58,85,58,]),'LPAREN':([3,46,53,62,63,67,68,69,70,71,72,86,],[4,54,62,62,62,62,62,62,62,62,62,62,]),'WIRE':([4,10,12,15,16,17,18,19,20,21,22,23,38,47,50,52,56,66,84,],[8,14,24,24,-7,-9,-10,-11,-12,-13,-14,40,-8,-15,-20,-19,-16,-23,-36,]),'COMMA':([5,7,11,13,36,39,41,42,43,49,55,57,64,65,85,],[-3,10,-5,-4,-6,48,-17,51,-21,48,-18,-22,-45,76,-46,]),'RPAREN':([5,6,7,11,13,36,58,60,61,64,65,73,74,77,78,79,80,81,83,85,87,],[-3,9,-2,-5,-4,-6,-31,-24,-32,-45,75,83,-34,-25,-26,-27,-28,-29,-33,-46,-30,]),'SEMICOLON':([9,39,41,42,43,44,49,55,57,58,59,60,61,74,75,77,78,79,80,81,83,87,],[12,47,-17,50,-21,52,56,-18,-22,-31,66,-24,-32,-34,84,-25,-26,-27,-28,-29,-33,-30,]),'ENDMODULE':([12,15,16,17,18,19,20,21,22,38,47,50,52,56,66,84,],[-35,37,-7,-9,-10,-11,-12,-13,-14,-8,-15,-20,-19,-16,-23,-36,]),'INPUT':([12,15,16,17,18,19,20,21,22,38,47,50,52,56,66,84,],[23,23,-7,-9,-10,-11,-12,-13,-14,-8,-15,-20,-19,-16,-23,-36,]),'OUTPUT':([12,15,16,17,18,19,20,21,22,38,47,50,52,56,66,84,],[25,25,-7,-9,-10,-11,-12,-13,-14,-8,-15,-20,-19,-16,-23,-36,]),'ASSIGN':([12,15,16,17,18,19,20,21,22,38,47,50,52,56,66,84,],[26,26,-7,-9,-10,-11,-12,-13,-14,-8,-15,-20,-19,-16,-23,-36,]),'AND':([12,15,16,17,18,19,20,21,22,38,47,50,52,56,66,84,],[28,28,-7,-9,-10,-11,-12,-13,-14,-8,-15,-20,-19,-16,-23,-36,]),'OR':([12,15,16,17,18,19,20,21,22,38,47,50,52,56,66,84,],[29,29,-7,-9,-10,-11,-12,-13,-14,-8,-15,-20,-19,-16,-23,-36,]),'NOT':([12,15,16,17,18,19,20,21,22,38,47,50,52,56,66,84,],[30,30,-7,-9,-10,-11,-12,-13,-14,-8,-15,-20,-19,-16,-23,-36,]),'NAND':([12,15,16,17,18,19,20,21,22,38,47,50,52,56,66,84,],[31,31,-7,-9,-10,-11,-12,-13,-14,-8,-15,-20,-19,-16,-23,-36,]),'NOR':([12,15,16,17,18,19,20,21,22,38,47,50,52,56,66,84,],[32,32,-7,-9,-10,-11,-12,-13,-14,-8,-15,-20,-19,-16,-23,-36,]),'XOR':([12,15,16,17,18,19,20,21,22,38,47,50,52,56,66,84,],[33,33,-7,-9,-10,-11,-12,-13,-14,-8,-15,-20,-19,-16,-23,-36,]),'XNOR':([12,15,16,17,18,19,20,21,22,38,47,50,52,56,66,84,],[34,34,-7,-9,-10,-11,-12,-13,-14,-8,-15,-20,-19,-16,-23,-36,]),'BUF':([12,15,16,17,18,19,20,21,22,38,47,50,52,56,66,84,],[35,35,-7,-9,-10,-11,-12,-13,-14,-8,-15,-20,-19,-16,-23,-36,]),'EQUALS':([45,],[53,]),'NUMBER':([53,62,63,67,68,69,70,71,72,86,],[61,61,61,61,61,61,61,61,61,61,]),'TILDE':([53,62,63,67,68,69,70,71,72,86,],[63,63,63,63,63,63,63,63,63,63,]),'QUESTION':([58,60,61,74,83,],[-31,72,-32,-34,-33,]),'PLUS':([58,59,60,61,73,74,77,78,79,80,81,82,83,87,],[-31,67,-24,-32,67,-34,-25,-26,-27,-28,-29,67,-33,67,]),'MINUS':([58,59,60,61,73,74,77,78,79,80,81,82,83,87,],[-31,68,-24,-32,68,-34,-25,-26,-27,-28,-29,68,-33,68,]),'AMPERSAND':([58,59,60,61,73,74,77,78,79,80,81,82,83,87,],[-31,69,-24,-32,69,-34,-25,-26,-27,-28,-29,69,-33,69,]),'BAR':([58,59,60,61,73,74,77,78,79,80,81,82,83,87,],[-31,70,-24,-32,70,-34,-25,-26,-27,-28,-29,70,-33,70,]),'CARET':([58,59,60,61,73,74,77,78,79,80,81,82,83,87,],[-31,71,-24,-32,71,-34,-25,-26,-27,-28,-29,71,-33,71,]),'COLON':([58,60,61,74,77,78,79,80,81,82,83,87,],[-31,-24,-32,-34,-25,-26,-27,-28,-29,86,-33,-30,]),}
 
 _lr_action = {}
 for _k, _v in _lr_action_items.items():
@@ -17,7 +17,7 @@ for _k, _v in _lr_action_items.items():
       _lr_action[_x][_k] = _y
 del _lr_action_items
 
-_lr_goto_items = {'module_definition':([0,],[1,]),'port_list':([4,],[6,]),'port_list_items':([4,],[7,]),'module_items':([10,],[12,]),'module_item':([10,12,],[13,34,]),'empty':([10,],[14,]),'input_declaration':([10,12,],[15,15,]),'output_declaration':([10,12,],[16,16,]),'wire_declaration':([10,12,],[17,17,]),'assign_statement':([10,12,],[18,18,]),'gate_instantiation':([10,12,],[19,19,]),'gate_type':([10,12,],[24,24,]),'input_list':([20,],[35,]),'wire_list':([22,],[38,]),'expression':([47,55,65,79,],[52,66,75,80,]),'term':([47,55,56,60,61,62,63,64,65,79,],[53,53,67,70,71,72,73,74,53,53,]),'signal_list':([48,],[58,]),}
+_lr_goto_items = {'module_definition':([0,],[1,]),'port_list':([4,],[6,]),'port_list_items':([4,],[7,]),'module_items':([12,],[15,]),'module_item':([12,15,],[16,38,]),'empty':([12,],[17,]),'input_declaration':([12,15,],[18,18,]),'output_declaration':([12,15,],[19,19,]),'wire_declaration':([12,15,],[20,20,]),'assign_statement':([12,15,],[21,21,]),'gate_instantiation':([12,15,],[22,22,]),'gate_type':([12,15,],[27,27,]),'input_list':([23,40,],[39,49,]),'wire_list':([24,],[42,]),'expression':([53,62,72,86,],[59,73,82,87,]),'term':([53,62,63,67,68,69,70,71,72,86,],[60,60,74,77,78,79,80,81,60,60,]),'signal_list':([54,],[65,]),}
 
 _lr_goto = {}
 for _k, _v in _lr_goto_items.items():
@@ -31,43 +31,46 @@ _lr_productions = [
   ('port_list -> port_list_items','port_list',1,'p_port_list','verilog_parser.py',45),
   ('port_list_items -> ID','port_list_items',1,'p_port_list_items','verilog_parser.py',49),
   ('port_list_items -> port_list_items COMMA ID','port_list_items',3,'p_port_list_items','verilog_parser.py',50),
-  ('module_items -> module_item','module_items',1,'p_module_items','verilog_parser.py',55),
-  ('module_items -> module_items module_item','module_items',2,'p_module_items','verilog_parser.py',56),
-  ('module_items -> empty','module_items',1,'p_module_items','verilog_parser.py',57),
-  ('module_item -> input_declaration','module_item',1,'p_module_item','verilog_parser.py',61),
-  ('module_item -> output_declaration','module_item',1,'p_module_item','verilog_parser.py',62),
-  ('module_item -> wire_declaration','module_item',1,'p_module_item','verilog_parser.py',63),
-  ('module_item -> assign_statement','module_item',1,'p_module_item','verilog_parser.py',64),
-  ('module_item -> gate_instantiation','module_item',1,'p_module_item','verilog_parser.py',65),
-  ('input_declaration -> INPUT input_list SEMICOLON','input_declaration',3,'p_input_declaration','verilog_parser.py',69),
-  ('input_list -> ID','input_list',1,'p_input_list','verilog_parser.py',73),
-  ('input_list -> input_list COMMA ID','input_list',3,'p_input_list','verilog_parser.py',74),
-  ('output_declaration -> OUTPUT ID SEMICOLON','output_declaration',3,'p_output_declaration','verilog_parser.py',81),
-  ('wire_declaration -> WIRE wire_list SEMICOLON','wire_declaration',3,'p_wire_declaration','verilog_parser.py',85),
-  ('wire_list -> ID','wire_list',1,'p_wire_list','verilog_parser.py',89),
-  ('wire_list -> wire_list COMMA ID','wire_list',3,'p_wire_list','verilog_parser.py',90),
-  ('assign_statement -> ASSIGN ID EQUALS expression SEMICOLON','assign_statement',5,'p_assign_statement','verilog_parser.py',97),
-  ('expression -> term','expression',1,'p_expression','verilog_parser.py',101),
-  ('expression -> expression PLUS term','expression',3,'p_expression','verilog_parser.py',102),
-  ('expression -> expression MINUS term','expression',3,'p_expression','verilog_parser.py',103),
-  ('expression -> expression AMPERSAND term','expression',3,'p_expression','verilog_parser.py',104),
-  ('expression -> expression BAR term','expression',3,'p_expression','verilog_parser.py',105),
-  ('expression -> expression CARET term','expression',3,'p_expression','verilog_parser.py',106),
-  ('expression -> term QUESTION expression COLON expression','expression',5,'p_expression','verilog_parser.py',107),
-  ('term -> ID','term',1,'p_term','verilog_parser.py',125),
-  ('term -> NUMBER','term',1,'p_term','verilog_parser.py',126),
-  ('term -> LPAREN expression RPAREN','term',3,'p_term','verilog_parser.py',127),
-  ('term -> TILDE term','term',2,'p_term','verilog_parser.py',128),
-  ('empty -> <empty>','empty',0,'p_empty','verilog_parser.py',137),
-  ('gate_instantiation -> gate_type ID LPAREN signal_list RPAREN SEMICOLON','gate_instantiation',6,'p_gate_instantiation','verilog_parser.py',141),
-  ('gate_type -> AND','gate_type',1,'p_gate_type','verilog_parser.py',150),
-  ('gate_type -> OR','gate_type',1,'p_gate_type','verilog_parser.py',151),
-  ('gate_type -> NOT','gate_type',1,'p_gate_type','verilog_parser.py',152),
-  ('gate_type -> NAND','gate_type',1,'p_gate_type','verilog_parser.py',153),
-  ('gate_type -> NOR','gate_type',1,'p_gate_type','verilog_parser.py',154),
-  ('gate_type -> XOR','gate_type',1,'p_gate_type','verilog_parser.py',155),
-  ('gate_type -> XNOR','gate_type',1,'p_gate_type','verilog_parser.py',156),
-  ('gate_type -> BUF','gate_type',1,'p_gate_type','verilog_parser.py',157),
-  ('signal_list -> ID','signal_list',1,'p_signal_list','verilog_parser.py',161),
-  ('signal_list -> signal_list COMMA ID','signal_list',3,'p_signal_list','verilog_parser.py',162),
+  ('port_list_items -> WIRE ID','port_list_items',2,'p_port_list_items','verilog_parser.py',51),
+  ('port_list_items -> port_list_items COMMA WIRE ID','port_list_items',4,'p_port_list_items','verilog_parser.py',52),
+  ('module_items -> module_item','module_items',1,'p_module_items','verilog_parser.py',66),
+  ('module_items -> module_items module_item','module_items',2,'p_module_items','verilog_parser.py',67),
+  ('module_items -> empty','module_items',1,'p_module_items','verilog_parser.py',68),
+  ('module_item -> input_declaration','module_item',1,'p_module_item','verilog_parser.py',72),
+  ('module_item -> output_declaration','module_item',1,'p_module_item','verilog_parser.py',73),
+  ('module_item -> wire_declaration','module_item',1,'p_module_item','verilog_parser.py',74),
+  ('module_item -> assign_statement','module_item',1,'p_module_item','verilog_parser.py',75),
+  ('module_item -> gate_instantiation','module_item',1,'p_module_item','verilog_parser.py',76),
+  ('input_declaration -> INPUT input_list SEMICOLON','input_declaration',3,'p_input_declaration','verilog_parser.py',80),
+  ('input_declaration -> INPUT WIRE input_list SEMICOLON','input_declaration',4,'p_input_declaration','verilog_parser.py',81),
+  ('input_list -> ID','input_list',1,'p_input_list','verilog_parser.py',89),
+  ('input_list -> input_list COMMA ID','input_list',3,'p_input_list','verilog_parser.py',90),
+  ('output_declaration -> OUTPUT ID SEMICOLON','output_declaration',3,'p_output_declaration','verilog_parser.py',97),
+  ('wire_declaration -> WIRE wire_list SEMICOLON','wire_declaration',3,'p_wire_declaration','verilog_parser.py',101),
+  ('wire_list -> ID','wire_list',1,'p_wire_list','verilog_parser.py',105),
+  ('wire_list -> wire_list COMMA ID','wire_list',3,'p_wire_list','verilog_parser.py',106),
+  ('assign_statement -> ASSIGN ID EQUALS expression SEMICOLON','assign_statement',5,'p_assign_statement','verilog_parser.py',113),
+  ('expression -> term','expression',1,'p_expression','verilog_parser.py',117),
+  ('expression -> expression PLUS term','expression',3,'p_expression','verilog_parser.py',118),
+  ('expression -> expression MINUS term','expression',3,'p_expression','verilog_parser.py',119),
+  ('expression -> expression AMPERSAND term','expression',3,'p_expression','verilog_parser.py',120),
+  ('expression -> expression BAR term','expression',3,'p_expression','verilog_parser.py',121),
+  ('expression -> expression CARET term','expression',3,'p_expression','verilog_parser.py',122),
+  ('expression -> term QUESTION expression COLON expression','expression',5,'p_expression','verilog_parser.py',123),
+  ('term -> ID','term',1,'p_term','verilog_parser.py',141),
+  ('term -> NUMBER','term',1,'p_term','verilog_parser.py',142),
+  ('term -> LPAREN expression RPAREN','term',3,'p_term','verilog_parser.py',143),
+  ('term -> TILDE term','term',2,'p_term','verilog_parser.py',144),
+  ('empty -> <empty>','empty',0,'p_empty','verilog_parser.py',153),
+  ('gate_instantiation -> gate_type ID LPAREN signal_list RPAREN SEMICOLON','gate_instantiation',6,'p_gate_instantiation','verilog_parser.py',157),
+  ('gate_type -> AND','gate_type',1,'p_gate_type','verilog_parser.py',166),
+  ('gate_type -> OR','gate_type',1,'p_gate_type','verilog_parser.py',167),
+  ('gate_type -> NOT','gate_type',1,'p_gate_type','verilog_parser.py',168),
+  ('gate_type -> NAND','gate_type',1,'p_gate_type','verilog_parser.py',169),
+  ('gate_type -> NOR','gate_type',1,'p_gate_type','verilog_parser.py',170),
+  ('gate_type -> XOR','gate_type',1,'p_gate_type','verilog_parser.py',171),
+  ('gate_type -> XNOR','gate_type',1,'p_gate_type','verilog_parser.py',172),
+  ('gate_type -> BUF','gate_type',1,'p_gate_type','verilog_parser.py',173),
+  ('signal_list -> ID','signal_list',1,'p_signal_list','verilog_parser.py',177),
+  ('signal_list -> signal_list COMMA ID','signal_list',3,'p_signal_list','verilog_parser.py',178),
 ]

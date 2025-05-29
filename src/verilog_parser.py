@@ -47,10 +47,21 @@ class VerilogParser:
         
     def p_port_list_items(self, p):
         '''port_list_items : ID
-                         | port_list_items COMMA ID'''
+                         | port_list_items COMMA ID
+                         | WIRE ID
+                         | port_list_items COMMA WIRE ID'''
         # 只收集端口名，不处理类型
-        pass
-        
+        if len(p) == 2:
+            self.module.inputs.append(p[1]) # Assuming it's an input for now, need to refine
+        elif len(p) == 4:
+            if p[2] == ',':
+                self.module.inputs.append(p[3]) # Assuming it's an input for now, need to refine
+            elif p[1].lower() == 'wire':
+                self.module.inputs.append(p[2]) # Assuming it's an input for now, need to refine
+        elif len(p) == 5:
+             if p[3].lower() == 'wire':
+                self.module.inputs.append(p[4]) # Assuming it's an input for now, need to refine
+
     def p_module_items(self, p):
         '''module_items : module_item
                        | module_items module_item
@@ -66,9 +77,14 @@ class VerilogParser:
         pass
         
     def p_input_declaration(self, p):
-        '''input_declaration : INPUT input_list SEMICOLON'''
-        pass
-        
+        '''input_declaration : INPUT input_list SEMICOLON
+                           | INPUT WIRE input_list SEMICOLON'''
+        # 如果有 WIRE 关键字，跳过它
+        if len(p) == 5:
+            p[0] = p[2] # input_list
+        else:
+            p[0] = p[1] # input_list
+
     def p_input_list(self, p):
         '''input_list : ID
                      | input_list COMMA ID'''

@@ -1,0 +1,59 @@
+digraph dead_code_example {
+	graph [concentrate=false dpi=300 nodesep=0.5 ordering=out rankdir=LR ranksep=0.8 splines=polyline]
+	node [fillcolor=white fontname=Arial fontsize=12 height=0.4 margin=0.1 penwidth=1.0 shape=record style=filled width=0.6]
+	edge [arrowhead=normal arrowsize=0.6 fontname=Arial fontsize=10 penwidth=1.0]
+	a [label=a fillcolor=lightblue shape=ellipse style=filled]
+	b [label=b fillcolor=lightblue shape=ellipse style=filled]
+	c [label=c fillcolor=lightblue shape=ellipse style=filled]
+	y [label=y fillcolor=lightblue shape=ellipse style=filled]
+	a [label=a fillcolor=lightblue shape=ellipse style=filled]
+	b [label=b fillcolor=lightblue shape=ellipse style=filled]
+	c [label=c fillcolor=lightblue shape=ellipse style=filled]
+	y [label=y fillcolor=lightgreen shape=ellipse style=filled]
+	w1 [label=w1 fillcolor=lightyellow shape=box style=filled]
+	w2 [label=w2 fillcolor=lightyellow shape=box style=filled]
+	w3 [label=w3 fillcolor=lightyellow shape=box style=filled]
+	dead_w1 [label=dead_w1 fillcolor=lightyellow shape=box style=filled]
+	dead_w2 [label=dead_w2 fillcolor=lightyellow shape=box style=filled]
+	dead_w3 [label=dead_w3 fillcolor=lightyellow shape=box style=filled]
+	assign_w1 [label="{{<A> a|<B> b}|{$06\nAND}|<w1> w1}" fillcolor=lightpink shape=record style=filled]
+	a -> assign_w1:A
+	b -> assign_w1:B
+	assign_w1:w1 -> w1
+	assign_w2 [label="{{<A> w1|<B> c}|{$07\nOR}|<w2> w2}" fillcolor=lightpink shape=record style=filled]
+	w1 -> assign_w2:A
+	c -> assign_w2:B
+	assign_w2:w2 -> w2
+	assign_w3 [label="{{<B> w2}|{$08\nNOT}|<w3> w3}" fillcolor=lightpink shape=record style=filled]
+	w2 -> assign_w3:A
+	assign_w3:w3 -> w3
+	assign_y [label="{<A> w3|{$09\nBUF}|<y> y}" fillcolor=lavender shape=record style=filled]
+	w3 -> assign_y:A
+	assign_y:y -> y
+	assign_dead_w1 [label="{{<A> a|<B> b}|{$10\nOR}|<dead_w1> dead_w1}" fillcolor=lightpink shape=record style=filled]
+	a -> assign_dead_w1:A
+	b -> assign_dead_w1:B
+	assign_dead_w1:dead_w1 -> dead_w1
+	assign_dead_w2 [label="{{<A> dead_w1|<B> c}|{$11\nAND}|<dead_w2> dead_w2}" fillcolor=lightpink shape=record style=filled]
+	dead_w1 -> assign_dead_w2:A
+	c -> assign_dead_w2:B
+	assign_dead_w2:dead_w2 -> dead_w2
+	assign_dead_w3 [label="{{<A> dead_w2|<B> a}|{$12\nXOR}|<dead_w3> dead_w3}" fillcolor=lightpink shape=record style=filled]
+	dead_w2 -> assign_dead_w3:A
+	a -> assign_dead_w3:B
+	assign_dead_w3:dead_w3 -> dead_w3
+	subgraph cluster_inputs {
+		color=lightblue label=Inputs rank=source style=filled
+		a
+		b
+		c
+		y
+		a
+		b
+		c
+	}
+	subgraph cluster_outputs {
+		color=lightgreen label=Outputs rank=sink style=filled
+		y
+	}
+}
