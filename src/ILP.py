@@ -289,13 +289,17 @@ def get_file_path():
     if len(sys.argv) > 1:
         return sys.argv[1]
     else:
-        return "test.lp"
+        return "test.lp" 
 
 if __name__ == "__main__":
     try:
-        solve_ilp()
+        lp_file_path = get_file_path() 
+        print(f"开始处理LP文件: {lp_file_path}")
+        solve_ilp(lp_file_path) 
     except KeyboardInterrupt:
         print("\n程序被用户中断")
+    except FileNotFoundError:
+        print(f"错误: LP文件未找到")
     except Exception as e:
         print(f"程序执行过程中出现错误: {e}")
         import traceback
