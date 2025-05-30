@@ -30,6 +30,82 @@ class VerilogModule:
                 # 如果在端口列表中出现但没有input/output/wire声明，默认为wire
                 if name not in self.wires:
                      self.wires.append(name)
+                     
+    def print_info(self):
+        """在终端打印模块的详细信息"""
+        print("\n" + "="*50)
+        print(f"模块名称: {self.name}")
+        print("="*50)
+        
+        print("\n输入端口:")
+        for i, input_name in enumerate(self.inputs):
+            print(f"  [{i+1}] {input_name}")
+            
+        print("\n输出端口:")
+        for i, output_name in enumerate(self.outputs):
+            print(f"  [{i+1}] {output_name}")
+            
+        print("\n内部连线:")
+        for i, wire_name in enumerate(self.wires):
+            print(f"  [{i+1}] {wire_name}")
+        
+        if self.gates:
+            print("\n门级元件:")
+            for i, gate in enumerate(self.gates):
+                inputs_str = ", ".join(gate.inputs)
+                print(f"  [{i+1}] {gate.gate_type} {gate.name}: 输入=({inputs_str}), 输出={gate.output}")
+        
+        if self.assigns:
+            print("\n赋值语句:")
+            for i, assign in enumerate(self.assigns):
+                print(f"  [{i+1}] {assign.left} = ", end="")
+                self._print_expression(assign.right)
+                print()
+        
+        print("="*50 + "\n")
+    
+    def _print_expression(self, expr, level=0):
+        """递归打印表达式"""
+        indent = "  " * level
+        
+        # 如果表达式是简单的标识符或数字
+        if isinstance(expr, str) or isinstance(expr, int):
+            print(f"{expr}", end="")
+            return
+            
+        # 一元操作（如~）
+        if isinstance(expr, dict) and (expr.get('op') == 'NOT' or expr.get('op') == '~'):
+            print("~(", end="")
+            self._print_expression(expr['right'], level+1)
+            print(")", end="")
+            return
+            
+        # 二元操作
+        if isinstance(expr, dict) and 'left' in expr and 'right' in expr:
+            op = expr['op']
+            # 使用原始操作符符号
+            op_symbol = op
+            
+            print("(", end="")
+            self._print_expression(expr['left'], level+1)
+            print(f" {op_symbol} ", end="")
+            self._print_expression(expr['right'], level+1)
+            print(")", end="")
+            return
+            
+        # 三元操作符
+        if isinstance(expr, dict) and expr.get('op') == '?:':
+            print("(", end="")
+            self._print_expression(expr['condition'], level+1)
+            print(" ? ", end="")
+            self._print_expression(expr['if_true'], level+1)
+            print(" : ", end="")
+            self._print_expression(expr['if_false'], level+1)
+            print(")", end="")
+            return
+            
+        # 其他情况
+        print(f"{expr}", end="")
 
 class Gate:
     def __init__(self, gate_type, name, inputs, output):
@@ -192,11 +268,11 @@ class VerilogParser:
             elif p[2] == '-':
                 p[0] = {'op': '-', 'left': p[1], 'right': p[3]}
             elif p[2] == '&':
-                p[0] = {'op': 'AND', 'left': p[1], 'right': p[3]}
+                p[0] = {'op': '&', 'left': p[1], 'right': p[3]}
             elif p[2] == '|':
-                p[0] = {'op': 'OR', 'left': p[1], 'right': p[3]}
+                p[0] = {'op': '|', 'left': p[1], 'right': p[3]}
             elif p[2] == '^':
-                p[0] = {'op': 'XOR', 'left': p[1], 'right': p[3]}
+                p[0] = {'op': '^', 'left': p[1], 'right': p[3]}
         elif len(p) == 6:  # 三元操作符: condition ? if_true : if_false
             p[0] = {'op': '?:', 'condition': p[1], 'if_true': p[3], 'if_false': p[5]}
             
@@ -208,7 +284,7 @@ class VerilogParser:
         if len(p) == 2:
             p[0] = p[1]
         elif len(p) == 3 and p[1] == '~':
-            p[0] = {'op': 'NOT', 'right': p[2]}
+            p[0] = {'op': '~', 'right': p[2]}
         else:
             p[0] = p[2]
             
@@ -278,6 +354,10 @@ def process_verilog(input_file, optimize=True):
         return False
     
     print("   解析完成")
+    
+    # 在终端显示解析后的模块信息
+    print("\n正在显示解析后的模块信息...")
+    module.print_info()
 
     # 优化阶段
     if optimize:

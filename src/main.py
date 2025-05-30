@@ -54,6 +54,10 @@ def compile_verilog(input_file, optimize=False, enhanced_style=True, show_intern
             print(f"错误: 解析Verilog代码时出错: {e}")
             return False
 
+    # 在终端显示解析后的模块信息
+    print("\n正在显示解析后的模块信息...")
+    module.print_info()
+
     # 生成DOT文件
     try:
         # 创建输出目录（如果不存在）
