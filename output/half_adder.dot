@@ -1,26 +1,26 @@
 digraph half_adder {
-	graph [concentrate=true nodesep=0.8 ordering=out rankdir=LR ranksep=1.2 splines=ortho]
-	node [fillcolor=white fontname=Arial height=0.5 margin=0.1 shape=record style=filled width=0.7]
-	edge [arrowhead=normal arrowsize=0.7 penwidth=1.0]
-	a [label=a fillcolor=white shape=ellipse style=filled]
-	b [label=b fillcolor=white shape=ellipse style=filled]
-	sum [label=sum fillcolor=white shape=ellipse style=filled]
-	carry [label=carry fillcolor=white shape=ellipse style=filled]
-	xor_xor1 [label="{{<a> a|<b> b}|$00\nXOR|<sum> sum}" shape=record]
-	and_and1 [label="{{<a> a|<b> b}|$01\nAND|<carry> carry}" shape=record]
-	a -> xor_xor1:a [headport=w tailport=e]
-	a -> and_and1:a [headport=w tailport=e]
-	b -> xor_xor1:b [headport=w tailport=e]
-	b -> and_and1:b [headport=w tailport=e]
-	xor_xor1:sum -> sum [headport=w tailport=e]
-	and_and1:carry -> carry [headport=w tailport=e]
+	graph [concentrate=false dpi=300 nodesep=0.5 ordering=out rankdir=LR ranksep=0.8 splines=polyline]
+	node [fillcolor=white fontname=Arial fontsize=12 height=0.4 margin=0.1 penwidth=1.0 shape=record style=filled width=0.6]
+	edge [arrowhead=normal arrowsize=0.6 fontname=Arial fontsize=10 penwidth=1.0]
+	a [label=a fillcolor=lightblue shape=ellipse style=filled]
+	b [label=b fillcolor=lightblue shape=ellipse style=filled]
+	sum [label=sum fillcolor=lightgreen shape=ellipse style=filled]
+	carry [label=carry fillcolor=lightgreen shape=ellipse style=filled]
+	a -> xor_xor1:A
+	b -> xor_xor1:B
+	xor_xor1 [label="{{<A> a|<B> b}|{$00\nXOR}|<out> sum}" fillcolor=lightpink shape=record style=filled]
+	xor_xor1:out -> sum
+	a -> and_and1:A
+	b -> and_and1:B
+	and_and1 [label="{{<A> a|<B> b}|{$01\nAND}|<out> carry}" fillcolor=lightpink shape=record style=filled]
+	and_and1:out -> carry
 	subgraph cluster_inputs {
-		rank=source style=invis
+		color=lightblue label=Inputs rank=source style=filled
 		a
 		b
 	}
 	subgraph cluster_outputs {
-		rank=sink style=invis
+		color=lightgreen label=Outputs rank=sink style=filled
 		sum
 		carry
 	}
