@@ -5,11 +5,8 @@ import uvicorn
 import os
 import uuid
 from graphviz import Digraph
-import tempfile
-import shutil
 from verilog_parser import VerilogParser
 from dot_generator import DotGenerator
-from cse_optimizer import CSEOptimizer
 from fastapi.middleware.cors import CORSMiddleware
 
 # 创建输出目录
@@ -27,7 +24,7 @@ app.add_middleware(
 )
 
 # 挂载静态资源目录
-app.mount("/output", StaticFiles(directory="output"), name="output")
+app.mount("../output", StaticFiles(directory="output"), name="output")
 
 # 处理Verilog代码的函数
 def process_verilog(verilog_code, optimize=False):
