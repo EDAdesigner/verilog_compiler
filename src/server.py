@@ -24,7 +24,9 @@ app.add_middleware(
 )
 
 # 挂载静态资源目录
-app.mount("../output", StaticFiles(directory="output"), name="output")
+import os
+output_dir = os.path.join(os.path.dirname(__file__), "..", "output")
+app.mount("/output", StaticFiles(directory=output_dir), name="output")
 
 # 处理Verilog代码的函数
 def process_verilog(verilog_code, optimize=False):
