@@ -13,6 +13,40 @@ class VerilogModule:
         self.assigns = []
         self.expressions = {}  # 用于存储表达式及其对应的wire
         
+    def print_info(self):
+        print("\n==================================================")
+        print(f"模块名称: {self.name}")
+        print("==================================================\n")
+        print("输入端口:")
+        for idx, port in enumerate(self.inputs, 1):
+            print(f"  [{idx}] {port}")
+        print("\n输出端口:")
+        for idx, port in enumerate(self.outputs, 1):
+            print(f"  [{idx}] {port}")
+        print("\n内部连线:")
+        for idx, wire in enumerate(self.wires, 1):
+            print(f"  [{idx}] {wire}")
+        print("\n赋值语句:")
+        for idx, assign in enumerate(self.assigns, 1):
+            left = assign.left
+            right = assign.right
+            print(f"  [{idx}] {left} = {self._expr_to_str(right)}")
+        print("==================================================\n")
+
+    def _expr_to_str(self, expr):
+        if isinstance(expr, dict):
+            op = expr.get('op')
+            if op in ['+', '-', '&', '|', '^']:
+                return f"({self._expr_to_str(expr['left'])} {op} {self._expr_to_str(expr['right'])})"
+            elif op == '~':
+                return f"~({self._expr_to_str(expr['right'])})"
+            elif op == '?:':
+                return f"({self._expr_to_str(expr['condition'])} ? {self._expr_to_str(expr['if_true'])} : {self._expr_to_str(expr['if_false'])})"
+            else:
+                return str(expr)
+        else:
+            return str(expr)
+
 class Gate:
     def __init__(self, gate_type, name, inputs, output):
         self.gate_type = gate_type
@@ -124,130 +158,119 @@ class VerilogParser:
         else:
             p[0] = [p[1]] + p[3]
             
-    def _get_expression_key(self, expr):
-        """生成表达式的唯一标识符"""
-        if isinstance(expr, dict):
-            # Use 'op' key consistently
-            if expr.get('op') == '+':
-                left_key = self._get_expression_key(expr['left'])
-                right_key = self._get_expression_key(expr['right'])
-                return f"({left_key}+{right_key})"
-            elif expr.get('op') == '&':
-                left_key = self._get_expression_key(expr['left'])
-                right_key = self._get_expression_key(expr['right'])
-                return f"({left_key}&{right_key})"
-            elif expr.get('op') == '|':
-                left_key = self._get_expression_key(expr['left'])
-                right_key = self._get_expression_key(expr['right'])
-                return f"({left_key}|{right_key})"
-            elif expr.get('op') == '^':
-                left_key = self._get_expression_key(expr['left'])
-                right_key = self._get_expression_key(expr['right'])
-                return f"({left_key}^{right_key})"
-            elif expr.get('op') == '~':
-                 right_key = self._get_expression_key(expr['right'])
-                 return f"(~{right_key})"
-            elif expr.get('op') == '?:': # Handle ternary operator
-                 cond_key = self._get_expression_key(expr['condition'])
-                 true_key = self._get_expression_key(expr['if_true'])
-                 false_key = self._get_expression_key(expr['if_false'])
-                 return f"({cond_key}?{true_key}:{false_key})"
-            # Handle other simple operations if needed
-            elif 'op' in expr: # Generic handling for other ops
-                operands = []
-                if 'left' in expr:
-                    operands.append(self._get_expression_key(expr['left']))
-                if 'right' in expr:
-                    operands.append(self._get_expression_key(expr['right']))
-                return f"({' '.join(operands)}{expr['op']})" # Simple representation
-
-        return str(expr)
-
     def _process_expression(self, expr):
         """处理表达式，返回对应的wire名称"""
-        if isinstance(expr, dict):
-            expr_key = self._get_expression_key(expr)
-            if expr_key in self.module.expressions:
-                # 如果表达式已经存在，直接返回对应的wire
-                return self.module.expressions[expr_key]
-            else:
-                # 如果是新表达式，创建新的wire
-                # Use 'op' key consistently
-                op = expr.get('op')
-                if op == '+':
-                    left_wire = self._process_expression(expr['left'])
-                    right_wire = self._process_expression(expr['right'])
-                    result_wire = expr.get('result', f'temp_wire_{self.temp_wire_count}')
-                    self.temp_wire_count += 1
-                    if result_wire not in self.module.wires:
-                        self.module.wires.append(result_wire)
-                    # 创建新的赋值语句，使用 'op'
-                    new_expr = {'op': '+', 'left': left_wire, 'right': right_wire}
-                    self.module.assigns.append(Assignment(result_wire, new_expr))
-                    self.module.expressions[expr_key] = result_wire
-                    return result_wire
-                elif op == '&':
-                    left_wire = self._process_expression(expr['left'])
-                    right_wire = self._process_expression(expr['right'])
-                    result_wire = f'temp_wire_{self.temp_wire_count}'
-                    self.temp_wire_count += 1
-                    self.module.wires.append(result_wire)
-                    # 创建新的赋值语句，使用 'op'
-                    new_expr = {'op': '&', 'left': left_wire, 'right': right_wire}
-                    self.module.assigns.append(Assignment(result_wire, new_expr))
-                    self.module.expressions[expr_key] = result_wire
-                    return result_wire
-                elif op == '|': # Handle OR_OP
-                    left_wire = self._process_expression(expr['left'])
-                    right_wire = self._process_expression(expr['right'])
-                    result_wire = f'temp_wire_{self.temp_wire_count}'
-                    self.temp_wire_count += 1
-                    self.module.wires.append(result_wire)
-                    # 创建新的赋值语句，使用 'op'
-                    new_expr = {'op': '|', 'left': left_wire, 'right': right_wire}
-                    self.module.assigns.append(Assignment(result_wire, new_expr))
-                    self.module.expressions[expr_key] = result_wire
-                    return result_wire
-                elif op == '^': # Handle XOR_OP
-                    left_wire = self._process_expression(expr['left'])
-                    right_wire = self._process_expression(expr['right'])
-                    result_wire = f'temp_wire_{self.temp_wire_count}'
-                    self.temp_wire_count += 1
-                    self.module.wires.append(result_wire)
-                    # 创建新的赋值语句，使用 'op'
-                    new_expr = {'op': '^', 'left': left_wire, 'right': right_wire}
-                    self.module.assigns.append(Assignment(result_wire, new_expr))
-                    self.module.expressions[expr_key] = result_wire
-                    return result_wire
-                elif op == '~': # Handle unary NOT
-                    right_wire = self._process_expression(expr['right'])
-                    result_wire = f'temp_wire_{self.temp_wire_count}'
-                    self.temp_wire_count += 1
-                    self.module.wires.append(result_wire)
-                    # 创建新的赋值语句，使用 'op'
-                    new_expr = {'op': '~', 'right': right_wire}
-                    self.module.assigns.append(Assignment(result_wire, new_expr))
-                    self.module.expressions[expr_key] = result_wire
-                    return result_wire
-                # Add handling for other operation types if needed
-                elif op == '?:': # Handle ternary operator
-                     cond_wire = self._process_expression(expr['condition'])
-                     true_wire = self._process_expression(expr['if_true'])
-                     false_wire = self._process_expression(expr['if_false'])
-                     result_wire = f'temp_wire_{self.temp_wire_count}'
-                     self.temp_wire_count += 1
-                     self.module.wires.append(result_wire)
-                     # 创建新的赋值语句，使用 'op'
-                     new_expr = {'op': '?:', 'condition': cond_wire, 'if_true': true_wire, 'if_false': false_wire}
-                     self.module.assigns.append(Assignment(result_wire, new_expr))
-                     self.module.expressions[expr_key] = result_wire
-                     return result_wire
-                else:
-                    # Fallback for unhandled dictionary structures
-                    print(f"Warning: Unhandled expression type in _process_expression: {expr}")
-                    return expr # Return original expression if unhandled
+        if not isinstance(expr, dict):
+            # 如果是变量名或常量，直接返回
+            return expr
+        expr_key = self._get_expression_key(expr)
+        if expr_key in self.module.expressions:
+            return self.module.expressions[expr_key]
+        # Use 'op' key consistently
+        op = expr.get('op')
+        if op == '+':
+            left_wire = self._process_expression(expr['left'])
+            right_wire = self._process_expression(expr['right'])
+            result_wire = expr.get('result', f'temp_wire_{self.temp_wire_count}')
+            self.temp_wire_count += 1
+            if result_wire not in self.module.wires:
+                self.module.wires.append(result_wire)
+            new_expr = {'op': '+', 'left': left_wire, 'right': right_wire}
+            self.module.assigns.append(Assignment(result_wire, new_expr))
+            self.module.expressions[expr_key] = result_wire
+            return result_wire
+        elif op == '&':
+            left_wire = self._process_expression(expr['left'])
+            right_wire = self._process_expression(expr['right'])
+            result_wire = f'temp_wire_{self.temp_wire_count}'
+            self.temp_wire_count += 1
+            self.module.wires.append(result_wire)
+            new_expr = {'op': '&', 'left': left_wire, 'right': right_wire}
+            self.module.assigns.append(Assignment(result_wire, new_expr))
+            self.module.expressions[expr_key] = result_wire
+            return result_wire
+        elif op == '|':
+            left_wire = self._process_expression(expr['left'])
+            right_wire = self._process_expression(expr['right'])
+            result_wire = f'temp_wire_{self.temp_wire_count}'
+            self.temp_wire_count += 1
+            self.module.wires.append(result_wire)
+            new_expr = {'op': '|', 'left': left_wire, 'right': right_wire}
+            self.module.assigns.append(Assignment(result_wire, new_expr))
+            self.module.expressions[expr_key] = result_wire
+            return result_wire
+        elif op == '^':
+            left_wire = self._process_expression(expr['left'])
+            right_wire = self._process_expression(expr['right'])
+            result_wire = f'temp_wire_{self.temp_wire_count}'
+            self.temp_wire_count += 1
+            self.module.wires.append(result_wire)
+            new_expr = {'op': '^', 'left': left_wire, 'right': right_wire}
+            self.module.assigns.append(Assignment(result_wire, new_expr))
+            self.module.expressions[expr_key] = result_wire
+            return result_wire
+        elif op == '~':
+            right_wire = self._process_expression(expr['right'])
+            result_wire = f'temp_wire_{self.temp_wire_count}'
+            self.temp_wire_count += 1
+            self.module.wires.append(result_wire)
+            new_expr = {'op': '~', 'right': right_wire}
+            self.module.assigns.append(Assignment(result_wire, new_expr))
+            self.module.expressions[expr_key] = result_wire
+            return result_wire
+        elif op == '?:':
+            cond_wire = self._process_expression(expr['condition'])
+            true_wire = self._process_expression(expr['if_true'])
+            false_wire = self._process_expression(expr['if_false'])
+            result_wire = f'temp_wire_{self.temp_wire_count}'
+            self.temp_wire_count += 1
+            self.module.wires.append(result_wire)
+            new_expr = {'op': '?:', 'condition': cond_wire, 'if_true': true_wire, 'if_false': false_wire}
+            self.module.assigns.append(Assignment(result_wire, new_expr))
+            self.module.expressions[expr_key] = result_wire
+            return result_wire
+        else:
+            print(f"Warning: Unhandled expression type in _process_expression: {expr}")
+            return expr
 
-        return expr # Return original expression if not a dictionary
+    def _get_expression_key(self, expr):
+        """生成表达式的唯一标识符"""
+        if not isinstance(expr, dict):
+            return str(expr)
+        # Use 'op' key consistently
+        if expr.get('op') == '+':
+            left_key = self._get_expression_key(expr['left'])
+            right_key = self._get_expression_key(expr['right'])
+            return f"({left_key}+{right_key})"
+        elif expr.get('op') == '&':
+            left_key = self._get_expression_key(expr['left'])
+            right_key = self._get_expression_key(expr['right'])
+            return f"({left_key}&{right_key})"
+        elif expr.get('op') == '|':
+            left_key = self._get_expression_key(expr['left'])
+            right_key = self._get_expression_key(expr['right'])
+            return f"({left_key}|{right_key})"
+        elif expr.get('op') == '^':
+            left_key = self._get_expression_key(expr['left'])
+            right_key = self._get_expression_key(expr['right'])
+            return f"({left_key}^{right_key})"
+        elif expr.get('op') == '~':
+            right_key = self._get_expression_key(expr['right'])
+            return f"(~{right_key})"
+        elif expr.get('op') == '?:':
+            cond_key = self._get_expression_key(expr['condition'])
+            true_key = self._get_expression_key(expr['if_true'])
+            false_key = self._get_expression_key(expr['if_false'])
+            return f"({cond_key}?{true_key}:{false_key})"
+        # Handle other simple operations if needed
+        elif 'op' in expr:
+            operands = []
+            if 'left' in expr:
+                operands.append(self._get_expression_key(expr['left']))
+            if 'right' in expr:
+                operands.append(self._get_expression_key(expr['right']))
+            return f"({' '.join(operands)}{expr['op']})"
+        return str(expr)
 
     def p_assign_statement(self, p):
         '''assign_statement : ASSIGN ID EQUALS expression SEMICOLON'''
@@ -255,38 +278,8 @@ class VerilogParser:
         right = p[4]
         # 处理表达式，获取最终的wire名称
         result_wire = self._process_expression(right)
-        # 判断是否为输出端口，且右侧为中间wire，直接连线不生成BUF
-        if left in self.module.outputs and isinstance(result_wire, str) and result_wire.startswith('temp_wire_'):
-            # When directly assigning to output from a temp_wire, check if the temp_wire is from a complex expression
-            # If result_wire corresponds to an expression, assign the expression structure, otherwise just the wire name
-            expr_structure = None
-            for expr_key, wire_name in self.module.expressions.items():
-                 if wire_name == result_wire:
-                      # Found the expression key for this temp_wire. Need to reconstruct the expression structure.
-                      # This is a simplified approach. A more robust parser would link wires back to their generating expressions.
-                      # For now, we'll just check if the expression_key looks like a complex operation.
-                      # A better approach would involve storing the expression structure with the temp_wire.
-                      if any(op in expr_key for op in ['+', '&', '|', '^', '~', '?:']):
-                           # Try to find the original expression dict from the assigns list
-                           original_assign = next((a for a in self.module.assigns if isinstance(a.left, str) and a.left == result_wire), None)
-                           if original_assign and isinstance(original_assign.right, dict):
-                                expr_structure = original_assign.right
-                                break # Found it
-
-            if expr_structure:
-                # Append the assignment with the expression structure if it came from a complex op
-                self.module.assigns.append(Assignment(left, expr_structure))
-            else:
-                # Otherwise, append the simple wire assignment
-                self.module.assigns.append(Assignment(left, result_wire))
-
-        elif isinstance(right, dict):
-            # If the right side was an expression dictionary from p_expression, use result_wire
-            # result_wire already points to the temp_wire created for this expression by _process_expression
-             self.module.assigns.append(Assignment(left, result_wire))
-        else:
-            # Simple assignment (e.g., assign w1 = a;)
-            self.module.assigns.append(Assignment(left, right))
+        # assign 右侧始终为 wire 名称
+        self.module.assigns.append(Assignment(left, result_wire))
 
     def _balance_add_chain(self, add_list):
         """递归将加法链分组为平衡二叉树结构，返回表达式树结构，不生成wire和assign"""

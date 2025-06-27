@@ -253,41 +253,56 @@ class VerilogParser:
         self.module.assigns.append(Assignment(left, p[4]))
         
     def p_expression(self, p):
-        '''expression : term
-                     | expression PLUS term
-                     | expression MINUS term
-                     | expression AMPERSAND term
-                     | expression BAR term
-                     | expression CARET term
-                     | term QUESTION expression COLON expression'''
-        if len(p) == 2:
+        '''expression : expression BAR xor_expr
+                      | xor_expr'''
+        if len(p) == 4:
+            p[0] = {'op': '|', 'left': p[1], 'right': p[3]}
+        else:
             p[0] = p[1]
-        elif len(p) == 4:
+
+    def p_xor_expr(self, p):
+        '''xor_expr : xor_expr CARET and_expr
+                    | and_expr'''
+        if len(p) == 4:
+            p[0] = {'op': '^', 'left': p[1], 'right': p[3]}
+        else:
+            p[0] = p[1]
+
+    def p_and_expr(self, p):
+        '''and_expr : and_expr AMPERSAND add_expr
+                    | add_expr'''
+        if len(p) == 4:
+            p[0] = {'op': '&', 'left': p[1], 'right': p[3]}
+        else:
+            p[0] = p[1]
+
+    def p_add_expr(self, p):
+        '''add_expr : add_expr PLUS term
+                    | add_expr MINUS term
+                    | term'''
+        if len(p) == 4:
             if p[2] == '+':
                 p[0] = {'op': '+', 'left': p[1], 'right': p[3]}
-            elif p[2] == '-':
+            else:
                 p[0] = {'op': '-', 'left': p[1], 'right': p[3]}
-            elif p[2] == '&':
-                p[0] = {'op': '&', 'left': p[1], 'right': p[3]}
-            elif p[2] == '|':
-                p[0] = {'op': '|', 'left': p[1], 'right': p[3]}
-            elif p[2] == '^':
-                p[0] = {'op': '^', 'left': p[1], 'right': p[3]}
-        elif len(p) == 6:  # 三元操作符: condition ? if_true : if_false
-            p[0] = {'op': '?:', 'condition': p[1], 'if_true': p[3], 'if_false': p[5]}
-            
+        else:
+            p[0] = p[1]
+
     def p_term(self, p):
         '''term : ID
-               | NUMBER
-               | LPAREN expression RPAREN
-               | TILDE term'''
+                | NUMBER
+                | LPAREN expression RPAREN
+                | TILDE term
+                | term QUESTION expression COLON expression'''
         if len(p) == 2:
             p[0] = p[1]
         elif len(p) == 3 and p[1] == '~':
             p[0] = {'op': '~', 'right': p[2]}
-        else:
+        elif len(p) == 4:
             p[0] = p[2]
-            
+        elif len(p) == 6:
+            p[0] = {'op': '?:', 'condition': p[1], 'if_true': p[3], 'if_false': p[5]}
+
     def p_empty(self, p):
         '''empty :'''
         pass
