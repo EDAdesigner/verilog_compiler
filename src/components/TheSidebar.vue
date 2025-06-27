@@ -6,13 +6,13 @@
         <div class="app-logo"></div>
         <h2 class="app-title">不知道叫什么名字</h2>
       </div>
-      
+
       <div class="menu-items">
         <div
           v-for="(item, index) in menuItems"
           :key="index"
           class="menu-item"
-          :class="{ 'active': activeRoute === item.path }"
+          :class="{ active: activeRoute === item.path }"
           @click="navigateTo(item.path)"
         >
           <div class="menu-icon">
@@ -27,33 +27,43 @@
 
 
 <script setup>
-import { ref, computed } from 'vue';
-import { useRouter, useRoute } from 'vue-router';
+import { ref, computed } from "vue";
+import { useRouter, useRoute } from "vue-router";
 
 const router = useRouter();
 const route = useRoute();
 
 const menuItems = ref([
-  { 
-    text: '主页', 
-    path: '/', 
-    icon: '&#xe608;' // 使用Unicode图标或SVG
+  {
+    text: "主页",
+    path: "/",
+    icon: "&#xe608;", // 使用Unicode图标或SVG
   },
-  { 
-    text: '代码生成图片', 
-    path: '/code-to-image', 
-    icon: '&#xe62c;' 
+  {
+    text: "代码生成图片",
+    path: "/code-to-image",
+    icon: "&#xe62c;",
   },
-  { 
-    text: '代码优化', 
-    path: '/code-optimization', 
-    icon: '&#xe68f;' 
+  {
+    text: "代码优化",
+    path: "/code-optimization",
+    icon: "&#xe68f;",
   },
-  { 
-    text: '关于我们', 
-    path: '/about', 
-    icon: '&#xe6e5;' 
-  }
+  {
+    text: "ASAP调度",
+    path: "/asap",
+    icon: "&#xe611;",
+  },
+  {
+    text: "ILP",
+    path: "/ilp",
+    icon: "&#xe602;",
+  },
+  {
+    text: "电路编辑",
+    path: "/about",
+    icon: "&#xe6e5;",
+  },
 ]);
 
 const activeRoute = computed(() => route.path);
@@ -63,14 +73,14 @@ const navigateTo = (path) => {
 };
 </script>
 
-<style>
+<style scoped>
+/* 在线链接服务仅供平台体验和调试使用，平台不承诺服务的稳定性，企业客户需下载字体包自行发布使用并做好备份。 */
 @font-face {
   font-family: 'iconfont';  /* Project id 4900944 */
-  src: url('//at.alicdn.com/t/c/font_4900944_5bkpru3p5z7.woff2?t=1745239331600') format('woff2'),
-       url('//at.alicdn.com/t/c/font_4900944_5bkpru3p5z7.woff?t=1745239331600') format('woff'),
-       url('//at.alicdn.com/t/c/font_4900944_5bkpru3p5z7.ttf?t=1745239331600') format('truetype');
+  src: url('//at.alicdn.com/t/c/font_4900944_t9wvoi5416.woff2?t=1751038265379') format('woff2'),
+       url('//at.alicdn.com/t/c/font_4900944_t9wvoi5416.woff?t=1751038265379') format('woff'),
+       url('//at.alicdn.com/t/c/font_4900944_t9wvoi5416.ttf?t=1751038265379') format('truetype');
 }
-
 /* 基础样式 */
 .sidebar {
   position: fixed;
@@ -81,7 +91,7 @@ const navigateTo = (path) => {
   z-index: 100;
   overflow: hidden;
   transition: all 0.3s ease;
-  font-family: 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+  font-family: "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
 }
 
 .sidebar-bg {
@@ -167,7 +177,7 @@ const navigateTo = (path) => {
   justify-content: center;
   color: rgba(255, 255, 255, 0.6);
   transition: all 0.3s ease;
-  font-family: 'iconfont'; /* 使用自定义字体图标 */
+  font-family: "iconfont"; /* 使用自定义字体图标 */
 }
 
 .menu-text {
@@ -190,13 +200,13 @@ const navigateTo = (path) => {
   .sidebar {
     width: 220px;
   }
-  
+
   .sidebar-header {
     padding: 0 16px 16px;
-  flex-direction: column;
+    flex-direction: column;
     align-items: flex-start;
   }
-  
+
   .app-logo {
     margin-bottom: 10px;
   }

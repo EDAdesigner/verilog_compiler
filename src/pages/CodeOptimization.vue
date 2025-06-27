@@ -3,12 +3,12 @@
     <!-- 顶部标题和按钮 -->
     <div class="header">
       <h1 class="title">代码优化</h1>
-      <button 
+      <button
         class="generate-btn"
         @click="optimizeCode"
         :disabled="isOptimizing"
       >
-        {{ isOptimizing ? '优化中...' : '开始优化' }}
+        {{ isOptimizing ? "优化中..." : "开始优化" }}
       </button>
     </div>
 
@@ -25,7 +25,7 @@
         </div>
         <textarea
           v-model="sourceCode"
-          class="code-editor" 
+          class="code-editor"
           placeholder="请输入需要优化的代码..."
           spellcheck="false"
         ></textarea>
@@ -36,14 +36,14 @@
         <div class="section-header">
           <h2>优化结果</h2>
           <div class="toolbar">
-            <button 
-              class="tool-btn" 
+            <button
+              class="tool-btn"
               @click="copyOptimizedCode"
               :disabled="!optimizedCode"
             >
               复制代码
             </button>
-            <button 
+            <button
               class="tool-btn"
               @click="downloadCode"
               :disabled="!optimizedCode"
@@ -52,64 +52,96 @@
             </button>
           </div>
         </div>
-        <pre class="optimized-code">{{ optimizedCode || statusMessage || '优化后的代码将显示在这里' }}</pre>
+        <pre class="optimized-code">{{
+          optimizedCode || statusMessage || "优化后的代码将显示在这里"
+        }}</pre>
       </div>
     </div>
   </div>
 </template>
 
 <script setup>
-import { ref } from 'vue';
+import { ref } from "vue";
+import axios from "axios";
+
+// 配置
+const API_BASE_URL = "http://localhost:8000";
 
 // 响应式数据
-const sourceCode = ref('');
-const optimizedCode = ref('');
+const sourceCode = ref("");
+const optimizedCode = ref("");
 const isOptimizing = ref(false);
-const statusMessage = ref('');
+const statusMessage = ref("");
 
 // 示例代码
-const exampleCode = `// 未优化代码示例
-function calculateTotal(items) {
-  let total = 0;
-  for (let i = 0; i < items.length; i++) {
-    total += items[i].price * items[i].quantity;
-  }
-  return total;
-}`;
+const exampleCode = `module unbalanced_add4(a, b, c, d, out);
+    input a, b, c, d;
+    output out;
+    assign out = (((a + b) + c) + d);
+endmodule
+`;
 
-// 优化代码
+// 优化代码（请求同代码转图片，只是取 .dot 字段内容）
 const optimizeCode = async () => {
   if (!sourceCode.value.trim()) {
-    statusMessage.value = '请输入代码后再优化';
+    statusMessage.value = "请输入代码后再优化";
     return;
   }
 
   isOptimizing.value = true;
-  statusMessage.value = '正在优化代码...';
-  
+  statusMessage.value = "正在优化代码...";
+  optimizedCode.value = "";
+
   try {
-    // 模拟API请求延迟
-    await new Promise(resolve => setTimeout(resolve, 1500));
-    
-    // 这里应该是实际的API调用
-    // const response = await fetch('/api/optimize-code', {
-    //   method: 'POST',
-    //   body: JSON.stringify({ code: sourceCode.value }),
-    //   headers: { 'Content-Type': 'application/json' }
-    // });
-    // const data = await response.json();
-    
-    // 模拟返回的优化后代码
-    optimizedCode.value = `// 优化后代码
-const calculateTotal = items => 
-  items.reduce((total, item) => 
-    total + item.price * item.quantity, 0);`;
-    
-    statusMessage.value = '代码优化成功！';
+    const formData = new FormData();
+    // 去除所有换行符
+    const codeWithoutNewlines = sourceCode.value
+      .trim()
+      .replace(/[\r\n]+/g, " ");
+    formData.append("verilog_code", codeWithoutNewlines);
+    formData.append("language", "verilog");
+    formData.append("format", "dot");
+    formData.append("style", "monokai");
+    formData.append("scale", "1.2");
+
+    const response = await axios.post(`${API_BASE_URL}/verilog`, formData, {
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
+      timeout: 15000,
+    });
+
+    // 处理返回的 .dot 内容
+    if (response.data?.dot_file) {
+      // 1. 直接返回 dot 文件路径
+      // 需要再次请求获取内容
+      const dotPath = response.data.dot_file;
+      let dotUrl = "";
+      if (dotPath.startsWith("http")) {
+        dotUrl = dotPath;
+      } else {
+        // 兼容本地路径
+        const fileName = dotPath.split(/[\\\/]/).pop();
+        dotUrl = `${API_BASE_URL}/output/${fileName}`;
+      }
+      // 获取 dot 文件内容
+      const dotRes = await axios.get(dotUrl);
+      optimizedCode.value = dotRes.data;
+    } else if (response.data?.dot_content) {
+      // 2. 直接返回 dot 内容
+      optimizedCode.value = response.data.dot_content;
+    } else if (typeof response.data === "string") {
+      // 3. 直接返回字符串
+      optimizedCode.value = response.data;
+    } else {
+      throw new Error("API返回格式不符合预期，缺少dot内容字段");
+    }
+
+    statusMessage.value = "代码优化成功！";
   } catch (error) {
-    console.error('优化失败:', error);
-    statusMessage.value = '代码优化失败，请重试';
-    optimizedCode.value = '';
+    console.error("优化失败:", error);
+    statusMessage.value = "代码优化失败，请重试";
+    optimizedCode.value = "";
   } finally {
     isOptimizing.value = false;
   }
@@ -117,38 +149,38 @@ const calculateTotal = items =>
 
 // 清空代码
 const clearCode = () => {
-  sourceCode.value = '';
-  statusMessage.value = '';
-  optimizedCode.value = '';
+  sourceCode.value = "";
+  statusMessage.value = "";
+  optimizedCode.value = "";
 };
 
 // 加载示例代码
 const loadExample = () => {
   sourceCode.value = exampleCode;
-  statusMessage.value = '已加载示例代码';
+  statusMessage.value = "已加载示例代码";
 };
 
 // 复制优化后的代码
 const copyOptimizedCode = async () => {
   if (!optimizedCode.value) return;
-  
+
   try {
     await navigator.clipboard.writeText(optimizedCode.value);
-    statusMessage.value = '代码已复制到剪贴板';
+    statusMessage.value = "代码已复制到剪贴板";
   } catch (err) {
-    console.error('复制失败:', err);
-    statusMessage.value = '复制失败，请手动选择复制';
+    console.error("复制失败:", err);
+    statusMessage.value = "复制失败，请手动选择复制";
   }
 };
 
-// 下载代码
+// 下载为 .dot 文件
 const downloadCode = () => {
   if (!optimizedCode.value) return;
-  
-  const blob = new Blob([optimizedCode.value], { type: 'text/plain' });
-  const link = document.createElement('a');
+
+  const blob = new Blob([optimizedCode.value], { type: "text/plain" });
+  const link = document.createElement("a");
   link.href = URL.createObjectURL(blob);
-  link.download = 'optimized-code.js';
+  link.download = "optimized-code.dot";
   document.body.appendChild(link);
   link.click();
   document.body.removeChild(link);
@@ -161,38 +193,44 @@ const downloadCode = () => {
   height: 100vh;
   display: flex;
   flex-direction: column;
-  background-color: #f5f7fa;
-  padding: 20px;
+  background: linear-gradient(135deg, #e3f0ff 0%, #f8fbff 100%);
+  padding: 24px;
 }
 
 .header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 20px;
-  padding-bottom: 15px;
-  border-bottom: 1px solid #e4e7ed;
+  margin-bottom: 24px;
+  padding-bottom: 16px;
+  border-bottom: 1.5px solid #e0e6ed;
+  background: transparent;
 }
 
 .title {
-  font-size: 24px;
-  color: #303133;
+  font-size: 26px;
+  color: #2d3a4b;
   margin: 0;
+  letter-spacing: 1px;
+  font-weight: 700;
 }
 
 .generate-btn {
-  background-color: #409eff;
-  color: white;
+  background: linear-gradient(90deg, #4f8cff 0%, #6fc3ff 100%);
+  color: #fff;
   border: none;
-  padding: 10px 20px;
-  border-radius: 4px;
-  font-size: 14px;
+  padding: 10px 28px;
+  border-radius: 22px;
+  font-size: 15px;
+  font-weight: 500;
   cursor: pointer;
-  transition: all 0.3s;
+  box-shadow: 0 2px 8px 0 rgba(79, 140, 255, 0.08);
+  transition: all 0.2s;
 }
 
-.generate-btn:hover {
-  background-color: #66b1ff;
+.generate-btn:hover:not(:disabled) {
+  background: linear-gradient(90deg, #357ae8 0%, #4f8cff 100%);
+  box-shadow: 0 4px 16px 0 rgba(79, 140, 255, 0.15);
 }
 
 .generate-btn:disabled {
@@ -200,16 +238,12 @@ const downloadCode = () => {
   cursor: not-allowed;
 }
 
-.generate-btn:disabled:hover {
-  background-color: #409eff;
-}
-
 /* 主要内容区样式 */
 .main-content {
   display: flex;
   flex: 1;
-  gap: 20px;
-  height: calc(100% - 70px);
+  gap: 28px;
+  height: calc(100% - 80px);
 }
 
 /* 两侧区域共用样式 */
@@ -218,46 +252,49 @@ const downloadCode = () => {
   flex: 1;
   display: flex;
   flex-direction: column;
-  background-color: white;
-  border-radius: 8px;
-  box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.1);
+  background: #fff;
+  border-radius: 14px;
+  box-shadow: 0 4px 24px 0 rgba(79, 140, 255, 0.07);
   overflow: hidden;
+  border: 1.5px solid #e3eaf2;
 }
 
 .section-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 12px 20px;
-  border-bottom: 1px solid #ebeef5;
+  padding: 16px 28px;
+  border-bottom: 1.5px solid #e0e6ed;
+  background: #f7faff;
 }
 
 .section-header h2 {
-  font-size: 16px;
-  color: #606266;
+  font-size: 17px;
+  color: #357ae8;
   margin: 0;
+  font-weight: 600;
 }
 
 .toolbar {
   display: flex;
-  gap: 10px;
+  gap: 12px;
 }
 
 .tool-btn {
-  background-color: #f5f7fa;
-  color: #606266;
-  border: 1px solid #dcdfe6;
-  padding: 5px 12px;
-  border-radius: 4px;
-  font-size: 12px;
+  background: #f0f6ff;
+  color: #357ae8;
+  border: 1px solid #b3d4fc;
+  padding: 6px 18px;
+  border-radius: 18px;
+  font-size: 13px;
   cursor: pointer;
-  transition: all 0.3s;
+  transition: all 0.2s;
 }
 
 .tool-btn:hover {
-  color: #409eff;
-  border-color: #c6e2ff;
-  background-color: #ecf5ff;
+  background: #e3f0ff;
+  color: #1a5fd0;
+  border-color: #7bb6fa;
 }
 
 .tool-btn:disabled {
@@ -268,34 +305,37 @@ const downloadCode = () => {
 /* 代码编辑器样式 */
 .code-editor {
   flex: 1;
-  padding: 15px;
+  padding: 18px;
   border: none;
   resize: none;
-  font-family: 'Courier New', Courier, monospace;
-  font-size: 14px;
-  line-height: 1.5;
-  color: #333;
-  background-color: #f8f8f8;
+  font-family: "JetBrains Mono", "Fira Mono", "Consolas", monospace;
+  font-size: 16px;
+  line-height: 1.7;
+  color: #222e3a;
+  background: #f7faff;
+  border-radius: 0 0 14px 14px;
+  transition: background 0.2s;
 }
 
 .code-editor:focus {
-  outline: none;
-  background-color: #fff;
+  outline: 2px solid #4f8cff;
+  background: #fff;
 }
 
 /* 优化后代码展示区 */
 .optimized-code {
   flex: 1;
-  padding: 15px;
+  padding: 18px;
   margin: 0;
   overflow: auto;
-  font-family: 'Courier New', Courier, monospace;
-  font-size: 14px;
-  line-height: 1.5;
-  color: #333;
-  background-color: #f8f8f8;
+  font-family: "JetBrains Mono", "Fira Mono", "Consolas", monospace;
+  font-size: 16px;
+  line-height: 1.7;
+  color: #1a2b3c;
+  background: #f7faff;
   white-space: pre-wrap;
   border: none;
+  border-radius: 0 0 14px 14px;
 }
 
 /* 状态消息样式 */

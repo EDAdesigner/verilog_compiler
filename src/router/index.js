@@ -3,6 +3,8 @@ import Home from '../pages/Home.vue'
 import CodeToImage from '../pages/CodeToImage.vue'
 import CodeOptimization from '../pages/CodeOptimization.vue'
 import About from '../pages/About.vue'
+import ASAP from '../pages/ASAP.vue'
+import ILP from '../pages/ILP.vue'
 
 const routes = [
   {
@@ -24,6 +26,14 @@ const routes = [
     path: '/about',
     name: 'About',
     component: About
+  }, {
+    path: '/asap',
+    name: 'ASAP',
+    component: ASAP
+  }, {
+    path: '/ilp',
+    name: 'ilp',
+    component: ILP
   }
 ]
 

@@ -3,6 +3,7 @@
     <TheSidebar />
     <RouterView class="main-content" />
   </div>
+  
 </template>
 
 <script setup>
