@@ -4,6 +4,7 @@
 from fastapi import FastAPI, HTTPException, UploadFile, File, Form
 from fastapi.responses import JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
 import uvicorn
 import os
 import uuid
@@ -42,16 +43,50 @@ app.add_middleware(
         "http://127.0.0.1:5173",
         "http://127.0.0.1:3000",
         "http://127.0.0.1:8080",
+        "http://localhost:4173",  # Vite预览端口
+        "http://127.0.0.1:4173",
+        "http://localhost:5174",  # 可能的其他端口
+        "http://127.0.0.1:5174",
         "*"  # 允许所有来源（开发环境使用，生产环境建议指定具体域名）
     ],
     allow_credentials=True,
-    allow_methods=["*"],  # 允许所有HTTP方法
-    allow_headers=["*"],  # 允许所有请求头
+    allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS", "HEAD"],  # 明确指定允许的方法
+    allow_headers=[
+        "Accept",
+        "Accept-Language",
+        "Content-Language",
+        "Content-Type",
+        "Authorization",
+        "X-Requested-With",
+        "Origin",
+        "Access-Control-Request-Method",
+        "Access-Control-Request-Headers",
+        "Cache-Control",
+        "Pragma"
+    ],  # 明确指定允许的请求头
+    expose_headers=["*"],  # 暴露所有响应头
+    max_age=86400,  # 预检请求缓存时间（24小时）
 )
 
 # 确保输出目录存在
 OUTPUT_DIR = Path("./output")
 OUTPUT_DIR.mkdir(exist_ok=True)
+
+# 挂载静态文件服务 - 将output目录暴露为/files路径
+app.mount("/files", StaticFiles(directory=str(OUTPUT_DIR)), name="files")
+
+@app.options("/{full_path:path}")
+async def options_handler(full_path: str):
+    """处理所有OPTIONS请求，确保CORS预检请求正常工作"""
+    return JSONResponse(
+        content={},
+        headers={
+            "Access-Control-Allow-Origin": "*",
+            "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, OPTIONS, HEAD",
+            "Access-Control-Allow-Headers": "Accept, Accept-Language, Content-Language, Content-Type, Authorization, X-Requested-With, Origin, Access-Control-Request-Method, Access-Control-Request-Headers, Cache-Control, Pragma",
+            "Access-Control-Max-Age": "86400",
+        }
+    )
 
 def compile_verilog_code(verilog_code: str, optimize: bool = False, enhanced_style: bool = True):
     """
@@ -109,12 +144,16 @@ def compile_verilog_code(verilog_code: str, optimize: bool = False, enhanced_sty
             dot = dot_generator.generate_dot()
             dot_file, png_file = dot_generator.save(str(output_base))
         
+        # 将文件路径转换为URL路径
+        dot_url = f"/files/{file_id}.dot"
+        png_url = f"/files/{file_id}.png"
+        
         return {
             "status": "success",
             "message": "Verilog代码编译成功",
             "files": {
-                "dot_file": dot_file,
-                "png_file": png_file
+                "dot_file": dot_url,
+                "png_file": png_url
             },
             "module_info": {
                 "name": module.name,
@@ -142,7 +181,15 @@ async def compile_verilog(
     
     返回生成的DOT文件和PNG图片的路径
     """
-    return compile_verilog_code(verilog_code, optimize=False, enhanced_style=enhanced_style)
+    result = compile_verilog_code(verilog_code, optimize=False, enhanced_style=enhanced_style)
+    return JSONResponse(
+        content=result,
+        headers={
+            "Access-Control-Allow-Origin": "*",
+            "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, OPTIONS, HEAD",
+            "Access-Control-Allow-Headers": "Accept, Accept-Language, Content-Language, Content-Type, Authorization, X-Requested-With, Origin, Access-Control-Request-Method, Access-Control-Request-Headers, Cache-Control, Pragma",
+        }
+    )
 
 @app.post("/optimize")
 async def compile_optimized_verilog(
@@ -163,7 +210,15 @@ async def compile_optimized_verilog(
             detail="优化模块不可用，请检查verilog_optimize模块是否正确安装"
         )
     
-    return compile_verilog_code(verilog_code, optimize=True, enhanced_style=enhanced_style)
+    result = compile_verilog_code(verilog_code, optimize=True, enhanced_style=enhanced_style)
+    return JSONResponse(
+        content=result,
+        headers={
+            "Access-Control-Allow-Origin": "*",
+            "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, OPTIONS, HEAD",
+            "Access-Control-Allow-Headers": "Accept, Accept-Language, Content-Language, Content-Type, Authorization, X-Requested-With, Origin, Access-Control-Request-Method, Access-Control-Request-Headers, Cache-Control, Pragma",
+        }
+    )
 
 @app.get("/")
 async def root():
@@ -173,9 +228,11 @@ async def root():
         "version": "1.0.0",
         "endpoints": {
             "/verilog": "编译Verilog代码（POST）",
-            "/optimize": "优化编译Verilog代码（POST）"
+            "/optimize": "优化编译Verilog代码（POST）",
+            "/files": "静态文件服务（GET）"
         },
-        "optimization_available": OPTIMIZATION_AVAILABLE
+        "optimization_available": OPTIMIZATION_AVAILABLE,
+        "static_files_url": "http://localhost:8000/files"
     }
 
 @app.get("/health")
@@ -188,6 +245,7 @@ if __name__ == "__main__":
     print(f"优化模块可用: {OPTIMIZATION_AVAILABLE}")
     print("服务器将在 http://localhost:8000 上运行")
     print("API文档可在 http://localhost:8000/docs 查看")
+    print("静态文件服务可在 http://localhost:8000/files 访问")
     
     uvicorn.run(
         "server:app",
