@@ -65,7 +65,7 @@ import { ref } from "vue";
 import axios from "axios";
 
 // 配置
-const API_BASE_URL = "http://localhost:8000";
+const API_BASE_URL = "/api";
 
 // 响应式数据
 const sourceCode = ref("");
@@ -99,11 +99,10 @@ const optimizeCode = async () => {
       .trim()
       .replace(/[\r\n]+/g, " ");
     formData.append("verilog_code", codeWithoutNewlines);
-    formData.append("language", "verilog");
-    formData.append("format", "dot");
-    formData.append("style", "monokai");
-    formData.append("scale", "1.2");
 
+    console.log("处理后的代码:", codeWithoutNewlines);
+
+    // 这里改为代理路径
     const response = await axios.post(`${API_BASE_URL}/verilog`, formData, {
       headers: {
         "Content-Type": "multipart/form-data",
@@ -111,36 +110,55 @@ const optimizeCode = async () => {
       timeout: 15000,
     });
 
-    // 处理返回的 .dot 内容
-    if (response.data?.dot_file) {
-      // 1. 直接返回 dot 文件路径
-      // 需要再次请求获取内容
-      const dotPath = response.data.dot_file;
+    console.log("API原始响应:", response.data); // 调试日志
+
+    // 处理 .dot 文件路径（兼容多种后端返回格式）
+    let dotPath = response.data?.dot_file;
+    // 兼容 files 字段
+    if (!dotPath && response.data?.files?.dot_file) {
+      dotPath = response.data.files.dot_file;
+    }
+
+    if (dotPath) {
       let dotUrl = "";
       if (dotPath.startsWith("http")) {
         dotUrl = dotPath;
       } else {
-        // 兼容本地路径
         const fileName = dotPath.split(/[\\\/]/).pop();
-        dotUrl = `${API_BASE_URL}/output/${fileName}`;
+        dotUrl = `http://localhost:8000/output/${fileName}`;
       }
       // 获取 dot 文件内容
       const dotRes = await axios.get(dotUrl);
       optimizedCode.value = dotRes.data;
+      statusMessage.value = "代码优化成功！";
     } else if (response.data?.dot_content) {
-      // 2. 直接返回 dot 内容
       optimizedCode.value = response.data.dot_content;
+      statusMessage.value = "代码优化成功！";
     } else if (typeof response.data === "string") {
-      // 3. 直接返回字符串
       optimizedCode.value = response.data;
+      statusMessage.value = "代码优化成功！";
     } else {
       throw new Error("API返回格式不符合预期，缺少dot内容字段");
     }
-
-    statusMessage.value = "代码优化成功！";
   } catch (error) {
     console.error("优化失败:", error);
-    statusMessage.value = "代码优化失败，请重试";
+    statusMessage.value = `代码优化失败: ${error.message || "未知错误"}
+${error.stack || ""}
+${JSON.stringify(error, null, 2)}`;
+    if (error.config) {
+      statusMessage.value += `\n\n请求配置:\n${JSON.stringify(
+        error.config,
+        null,
+        2
+      )}`;
+    }
+    if (error.response) {
+      statusMessage.value += `\n\n响应内容:\n${JSON.stringify(
+        error.response,
+        null,
+        2
+      )}`;
+    }
     optimizedCode.value = "";
   } finally {
     isOptimizing.value = false;

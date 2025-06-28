@@ -78,7 +78,7 @@ import { ref } from "vue";
 import axios from "axios";
 
 // 配置
-const API_BASE_URL = "http://localhost:8000";
+const API_BASE_URL = "/api";
 const IMAGE_BASE_URL = `${API_BASE_URL}/output`;
 
 // 响应式数据
@@ -111,13 +111,10 @@ const generateImage = async () => {
     // 去除所有换行符
     const codeWithoutNewlines = codeInput.value.trim().replace(/[\r\n]+/g, " ");
     formData.append("verilog_code", codeWithoutNewlines);
-    formData.append("language", "verilog");
-    formData.append("format", "png");
-    formData.append("style", "monokai");
-    formData.append("scale", "1.2");
 
     console.log("处理后的代码:", codeWithoutNewlines);
 
+    // 这里改为代理路径
     const response = await axios.post(`${API_BASE_URL}/verilog`, formData, {
       headers: {
         "Content-Type": "multipart/form-data",
@@ -128,28 +125,26 @@ const generateImage = async () => {
     console.log("API原始响应:", response.data); // 调试日志
 
     // 处理图片路径（兼容多种后端返回格式）
-    if (response.data?.png_file) {
+    let pngPath = response.data?.png_file;
+    // 新增：兼容 files 字段
+    if (!pngPath && response.data?.files?.png_file) {
+      pngPath = response.data.files.png_file;
+    }
+
+    if (pngPath) {
       let finalUrl = "";
-      const rawPath = response.data.png_file;
-
       // 情况1：已经是完整URL
-      if (rawPath.startsWith("http")) {
-        finalUrl = rawPath;
+      if (pngPath.startsWith("http")) {
+        finalUrl = pngPath;
       }
-      // 情况2：Windows绝对路径
-      else if (rawPath.match(/^[a-zA-Z]:[\\\/]/)) {
-        const fileName = rawPath.split(/[\\\/]/).pop();
-        finalUrl = `${IMAGE_BASE_URL}/${fileName}`;
-      }
-      // 情况3：Linux绝对路径或相对路径
+      // 情况2：Windows绝对路径或相对路径
       else {
-        const cleanPath = rawPath.replace(/^.*output[\\\/]/, "");
-        finalUrl = `${IMAGE_BASE_URL}/${cleanPath.replace(/\\/g, "/")}`;
+        const fileName = pngPath.split(/[\\\/]/).pop();
+        // 拼成后端静态服务的 HTTP 地址
+        finalUrl = `http://localhost:8000/output/${fileName}`;
       }
-
       generatedImage.value = finalUrl;
       statusMessage.value = "图片生成成功";
-
       console.log("生成的图片URL:", generatedImage.value);
       verifyImageUrl(generatedImage.value); // 立即验证URL有效性
     } else if (response.data?.image_url) {
@@ -162,7 +157,26 @@ const generateImage = async () => {
       throw new Error("API返回格式不符合预期，缺少图片数据字段");
     }
   } catch (error) {
-    handleError(error);
+    // 新增详细输出
+    console.error("请求失败详情:", error);
+    statusMessage.value = `请求失败: ${error.message || "未知错误"}
+${error.stack || ""}
+${JSON.stringify(error, null, 2)}`;
+    // 额外输出 axios 配置和响应
+    if (error.config) {
+      statusMessage.value += `\n\n请求配置:\n${JSON.stringify(
+        error.config,
+        null,
+        2
+      )}`;
+    }
+    if (error.response) {
+      statusMessage.value += `\n\n响应内容:\n${JSON.stringify(
+        error.response,
+        null,
+        2
+      )}`;
+    }
   } finally {
     isGenerating.value = false;
   }
@@ -170,6 +184,7 @@ const generateImage = async () => {
 
 // 验证图片URL是否可访问
 const verifyImageUrl = async (url) => {
+  console.log(url);
   try {
     const response = await fetch(url, { method: "HEAD" });
     if (!response.ok) {
@@ -476,5 +491,95 @@ const handleImageError = () => {
   object-fit: contain;
   border-radius: 8px;
   box-shadow: 0 2px 12px 0 rgba(79, 140, 255, 0.1);
+}
+
+/* 保证卡片高度一致，内容居中 */
+.feature-card {
+  background: #fff;
+  border-radius: 16px;
+  box-shadow: 0 4px 24px rgba(79, 140, 255, 0.07);
+  padding: 34px 24px 28px 24px;
+  text-align: center;
+  cursor: pointer;
+  transition: box-shadow 0.3s cubic-bezier(0.25, 0.8, 0.25, 1),
+    border-color 0.3s, transform 0.3s;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-height: 260px;
+  height: 320px; /* 新增：固定高度，防止内容撑开 */
+  border: 1.5px solid #e3eaf2;
+  position: relative;
+  overflow: hidden;
+  justify-content: flex-start;
+}
+
+.feature-card h3 {
+  color: #357ae8;
+  margin: 18px 0 10px;
+  font-size: 20px;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+
+.feature-card p {
+  color: #606266;
+  font-size: 15px;
+  line-height: 1.6;
+  margin: 0;
+  flex: 1 1 auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.icon {
+  font-size: 44px;
+  transition: transform 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+  margin-bottom: 12px;
+  display: inline-block;
+  user-select: none;
+  flex-shrink: 0;
+}
+
+.enter-btn {
+  margin-top: 18px;
+  background: linear-gradient(90deg, #4f8cff 0%, #6fc3ff 100%);
+  color: #fff;
+  border: none;
+  padding: 7px 28px;
+  border-radius: 18px;
+  font-size: 15px;
+  font-weight: 500;
+  cursor: pointer;
+  box-shadow: 0 2px 8px 0 rgba(79, 140, 255, 0.08);
+  transition: background 0.2s, box-shadow 0.2s, opacity 0.2s;
+  opacity: 0.95;
+  position: absolute;
+  left: 50%;
+  bottom: 24px;
+  transform: translateX(-50%);
+  /* 绝对定位，按钮不会撑开卡片高度 */
+}
+
+@media (max-width: 1200px) {
+  .cards-container {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .feature-card {
+    height: 320px;
+    min-height: 220px;
+  }
+}
+
+@media (max-width: 800px) {
+  .cards-container {
+    grid-template-columns: 1fr;
+  }
+  .feature-card {
+    height: 260px;
+    min-height: 180px;
+    padding: 18px 10px;
+  }
 }
 </style>

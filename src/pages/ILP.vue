@@ -2,60 +2,27 @@
   <div class="code-optimization-container">
     <!-- 顶部标题和按钮 -->
     <div class="header">
-      <h1 class="title">ASAP/ALAP调度分析</h1>
-      <div style="display: flex; align-items: center; gap: 16px">
-        <select
-          v-model="scheduleType"
-          style="
-            height: 32px;
-            border-radius: 4px;
-            border: 1px solid #dcdfe6;
-            padding: 0 8px;
-          "
-        >
-          <option value="ASAP">ASAP调度</option>
-          <option value="ALAP">ALAP调度</option>
-        </select>
-        <input
-          v-if="scheduleType === 'ALAP'"
-          v-model.number="deadline"
-          type="number"
-          min="1"
-          style="
-            width: 80px;
-            height: 32px;
-            margin-left: 8px;
-            border-radius: 4px;
-            border: 1px solid #dcdfe6;
-            padding: 0 8px;
-          "
-          placeholder="调度周期数"
-        />
-        <button
-          class="generate-btn"
-          @click="runSchedule"
-          :disabled="isOptimizing"
-        >
-          {{ isOptimizing ? "调度中..." : "开始调度" }}
-        </button>
-      </div>
+      <h1 class="title">ILP调度分析</h1>
+      <button class="generate-btn" @click="runILP" :disabled="isSolving">
+        {{ isSolving ? "求解中..." : "开始求解" }}
+      </button>
     </div>
 
     <!-- 主要内容区 -->
     <div class="main-content">
-      <!-- 左侧BLIF输入区 -->
+      <!-- 左侧LP输入区 -->
       <div class="code-input-section">
         <div class="section-header">
-          <h2>BLIF代码输入</h2>
+          <h2>LP模型输入</h2>
           <div class="toolbar">
             <button class="tool-btn" @click="clearCode">清空</button>
             <button class="tool-btn" @click="loadExample">示例</button>
           </div>
         </div>
         <textarea
-          v-model="sourceCode"
+          v-model="lpCode"
           class="code-editor"
-          placeholder="请输入BLIF格式代码..."
+          placeholder="请输入ILP模型（如schedule.lp内容）..."
           spellcheck="false"
         ></textarea>
       </div>
@@ -66,7 +33,7 @@
           <h2>调度结果</h2>
         </div>
         <pre class="optimized-code">{{
-          scheduleResult || statusMessage || "调度结果将显示在这里"
+          ilpResult || statusMessage || "调度结果将显示在这里"
         }}</pre>
       </div>
     </div>
@@ -77,301 +44,179 @@
 import { ref } from "vue";
 
 // 响应式数据
-const sourceCode = ref("");
-const scheduleResult = ref("");
-const isOptimizing = ref(false);
+const lpCode = ref("");
+const ilpResult = ref("");
+const isSolving = ref(false);
 const statusMessage = ref("");
-const deadline = ref(5);
-const scheduleType = ref("ASAP");
 
-const exampleCode = `.model test
-.inputs a b c
-.outputs y
-.names a b n1
-11 1
-.names n1 c y
-1- 1
--1 1
+// 示例LP代码
+const exampleCode = `Min
+XA1 + 2XA2 + 3XA3 + 4XA4 + 5XA5
+Subject To
+\\ 开始时间约束
+Xi1 = 1
+Xj1 = 1
+Xl2 = 1
+Xm2 = 1
+Xn3 = 1
+Xq4 = 1
+Xh1 + Xh2 = 1
+Xk2 + Xk3 = 1
+Xg1 + Xg2 = 1
+Xo3 + Xo4 = 1
+Xp2 + Xp3 + Xp4 = 1
+\\ 顺序依赖约束
+2Xk2 + 3Xk3 - Xh1 - 2Xh2 >= 1
+2Xk2 + 3Xk3 - Xi1 >= 1
+2Xk2 + 3Xk3 - Xg1- 2Xg2 >= 1
+4Xo4 + 3Xo3 - 2Xk2 - 3Xk3 >= 1 
+2Xp2 + 3Xp3 + 4Xp4 - Xg1 - 2Xg2 >= 1
+5XA5 - 2Xp2 - 3Xp3 - 4Xp4 >= 1
+5XA5 - 3Xo3 - 4Xo4 >= 1
+\\ 资源约束
+Xh1 <= 2
+Xj1 + Xg1 <= 1
+Xi1 <= 1
+Xl2 + Xm2 + Xh2 <= 2
+Xk2 + Xg2 + Xp2 <= 1
+Xn3 + Xo3 <= 2
+Xk3 <= 1
+Xp3 <= 1
+Xo4 <= 2
+Xq4 + Xp4 <= 2
+Binary
+Xi1
+Xi2
+Xi3
+Xi4
+Xi5
+Xj1
+Xj2
+Xj3
+Xj4
+Xj5
+Xh1
+Xh2
+Xh3
+Xh4
+Xh5
+Xg1
+Xg2
+Xg3
+Xg4
+Xg5
+Xk1
+Xk2
+Xk3
+Xk4
+Xk5
+Xl1
+Xl2
+Xl3
+Xl4
+Xl5
+Xm1
+Xm2
+Xm3
+Xm4
+Xm5
+Xn1
+Xn2
+Xn3
+Xn4
+Xn5
+Xo1
+Xo2
+Xo3
+Xo4
+Xo5
+Xp1
+Xp2
+Xp3
+Xp4
+Xp5
+Xq1
+Xq2
+Xq3
+Xq4
+Xq5
+XA1
+XA2
+XA3
+XA4
+XA5
+End
+`;
+
+const exampleResult = `<?xml version = "1.0" encoding="UTF-8" standalone="yes"?>
+<CPLEXSolution version="1.2">
+ <header
+   problemName="schedule.lp"
+   solutionName="incumbent"
+   solutionIndex="-1"
+   objectiveValue="5"
+   solutionTypeValue="3"
+   solutionTypeString="primal"
+   solutionStatusValue="101"
+   solutionStatusString="integer optimal solution"
+   solutionMethodString="mip"
+   primalFeasible="1"
+   dualFeasible="1"
+   MIPNodes="0"
+   MIPIterations="0"
+   writeLevel="1"/>
+ <quality
+   epInt="1.0000000000000001e-05"
+   epRHS="9.9999999999999995e-07"
+   maxIntInfeas="0"
+   maxPrimalInfeas="0"
+   maxX="1"
+   maxSlack="1"/>
+ <linearConstraints>
+  <constraint name="c1" index="0" slack="0"/>
+  ...
+ </linearConstraints>
+ <variables>
+  <variable name="XA1" index="0" value="0"/>
+  <variable name="XA2" index="1" value="0"/>
+  ...
+ </variables>
+ <objectiveValues>
+  <objective index="0" name="obj1" value="5"/>
+ </objectiveValues>
+</CPLEXSolution>
 `;
 
 const clearCode = () => {
-  sourceCode.value = "";
+  lpCode.value = "";
   statusMessage.value = "";
-  scheduleResult.value = "";
+  ilpResult.value = "";
 };
 
 const loadExample = () => {
-  sourceCode.value = exampleCode;
-  statusMessage.value = "已加载示例BLIF代码";
+  lpCode.value = exampleCode;
+  ilpResult.value = "";
+  statusMessage.value = "已加载示例LP模型";
 };
 
-const runSchedule = async () => {
-  if (!sourceCode.value.trim()) {
-    statusMessage.value = "请输入BLIF代码后再调度";
+const runILP = () => {
+  if (!lpCode.value.trim()) {
+    statusMessage.value = "请输入ILP模型后再求解";
     return;
   }
-  isOptimizing.value = true;
-  statusMessage.value = "正在调度...";
-  scheduleResult.value = "";
-  try {
-    await new Promise((resolve) => setTimeout(resolve, 500));
-    const blifData = readBlifString(sourceCode.value);
-    const networkData = processGateNetwork(blifData);
-    if (!networkData) {
-      scheduleResult.value = "数据处理失败";
-      return;
-    }
-    let resultStr = "";
-    if (scheduleType.value === "ASAP") {
-      const asapResult = ASAP(networkData);
-      resultStr += printScheduleResult(networkData, asapResult, "ASAP");
-    } else {
-      const alapResult = ALAP(networkData, deadline.value);
-      resultStr += printScheduleResult(networkData, alapResult, "ALAP");
-    }
-    scheduleResult.value = resultStr;
-    statusMessage.value = "调度完成！";
-  } catch (e) {
-    scheduleResult.value = "调度出错：" + e.message;
-  } finally {
-    isOptimizing.value = false;
-  }
+  isSolving.value = true;
+  statusMessage.value = "正在模拟求解...";
+  ilpResult.value = "";
+  // 实际应为后端请求，这里仅做前端演示
+  setTimeout(() => {
+    ilpResult.value = exampleResult;
+    statusMessage.value = "求解完成！（演示数据）";
+    isSolving.value = false;
+  }, 1200);
 };
-
-// 解析BLIF字符串
-function readBlifString(content) {
-  const lines = content.split("\n").map((line) => line.trim());
-  const blifData = { model: "", inputs: [], outputs: [], names: [] };
-  for (let i = 0; i < lines.length; i++) {
-    const line = lines[i];
-    if (line === "" || line.startsWith("#")) continue;
-    if (line.startsWith(".model")) blifData.model = line.split(" ")[1];
-    else if (line.startsWith(".inputs"))
-      blifData.inputs = line.substring(7).trim().split(" ").filter(Boolean);
-    else if (line.startsWith(".outputs"))
-      blifData.outputs = line.substring(8).trim().split(" ").filter(Boolean);
-    else if (line.startsWith(".names")) {
-      const variables = line.substring(6).trim().split(" ");
-      const nameData = {
-        inputs: variables.slice(0, -1),
-        output: variables[variables.length - 1],
-        truth_table: "",
-        gate_type: "",
-      };
-      i++;
-      let expressions = [];
-      let truthRows = [];
-      while (i < lines.length && !lines[i].startsWith(".")) {
-        if (lines[i] !== "") {
-          const row = lines[i].trim().split(" ")[0];
-          truthRows.push(row);
-          let termExpr = [];
-          for (let j = 0; j < row.length; j++) {
-            if (row[j] === "1") termExpr.push(nameData.inputs[j]);
-            else if (row[j] === "0") termExpr.push(`!${nameData.inputs[j]}`);
-          }
-          if (termExpr.length > 0) expressions.push(termExpr.join(" and "));
-        }
-        i++;
-      }
-      i--;
-      if (nameData.inputs.length === 1) {
-        if (truthRows.length === 1 && truthRows[0] === "0")
-          nameData.gate_type = "not";
-      } else {
-        if (
-          truthRows.length === 1 &&
-          truthRows[0].indexOf("0") === -1 &&
-          truthRows[0].indexOf("-") === -1
-        )
-          nameData.gate_type = "and";
-        else if (truthRows.every((row) => row.indexOf("0") === -1))
-          nameData.gate_type = "or";
-        else nameData.gate_type = "complex";
-      }
-      nameData.truth_table = expressions.join(" or ");
-      blifData.names.push(nameData);
-    }
-  }
-  return blifData;
-}
-
-// 处理门电路网络
-function processGateNetwork(blifData) {
-  if (!blifData) return null;
-  const inputs = blifData.inputs;
-  const outputs = blifData.outputs;
-  const gates = blifData.names.map((nameData) => ({
-    inputs: nameData.inputs,
-    output: nameData.output,
-    gate_type: nameData.gate_type,
-  }));
-  const intermediates = gates
-    .map((gate) => gate.output)
-    .filter((output) => !outputs.includes(output));
-  return { inputs, outputs, intermediates, gates };
-}
-
-// ASAP调度
-function ASAP(data) {
-  if (!data) return null;
-  const schedule = {};
-  [...data.inputs, ...data.intermediates, ...data.outputs].forEach((node) => {
-    schedule[node] = -1;
-  });
-  data.inputs.forEach((input) => {
-    schedule[input] = 0;
-  });
-  const areInputsScheduled = (gate) => {
-    return gate.inputs.every((input) => schedule[input] !== -1);
-  };
-  let changed;
-  do {
-    changed = false;
-    data.gates.forEach((gate) => {
-      if (schedule[gate.output] === -1 && areInputsScheduled(gate)) {
-        const maxInputLevel = Math.max(
-          ...gate.inputs.map((input) => schedule[input])
-        );
-        schedule[gate.output] = maxInputLevel + 1;
-        changed = true;
-      }
-    });
-  } while (changed);
-  const maxLevel = Math.max(...Object.values(schedule));
-  const levels = Array.from({ length: maxLevel + 1 }, () => []);
-  Object.entries(schedule).forEach(([node, level]) => {
-    if (level >= 0) {
-      levels[level].push(node);
-    }
-  });
-  return { schedule, levels, maxLevel };
-}
-
-// ALAP调度
-function ALAP(data, deadline) {
-  if (!data) return null;
-  const schedule = {};
-  [...data.inputs, ...data.intermediates, ...data.outputs].forEach((node) => {
-    schedule[node] = -1;
-  });
-  data.inputs.forEach((input) => {
-    schedule[input] = 0;
-  });
-  data.outputs.forEach((output) => {
-    schedule[output] = deadline;
-  });
-  for (const output of data.outputs) {
-    const outputGate = data.gates.find((g) => g.output === output);
-    if (outputGate) {
-      const minRequiredLevel = getMinRequiredLevel(outputGate, data.gates);
-      if (minRequiredLevel > deadline) {
-        return null;
-      }
-    }
-  }
-  const areOutputsScheduled = (gate, gates) => {
-    const dependentGates = gates.filter((g) => g.inputs.includes(gate.output));
-    if (dependentGates.length === 0) {
-      return schedule[gate.output] !== -1;
-    }
-    return dependentGates.every((g) => schedule[g.output] !== -1);
-  };
-  let changed;
-  do {
-    changed = false;
-    [...data.gates].reverse().forEach((gate) => {
-      if (
-        schedule[gate.output] === -1 &&
-        areOutputsScheduled(gate, data.gates)
-      ) {
-        const dependentGates = data.gates.filter((g) =>
-          g.inputs.includes(gate.output)
-        );
-        if (dependentGates.length === 0 && schedule[gate.output] === -1) {
-          schedule[gate.output] = deadline;
-        } else {
-          const minDependentTime = Math.min(
-            ...dependentGates.map((g) => schedule[g.output])
-          );
-          schedule[gate.output] = minDependentTime - 1;
-        }
-        changed = true;
-      }
-    });
-  } while (changed);
-  const levels = Array.from({ length: deadline + 1 }, () => []);
-  Object.entries(schedule).forEach(([node, level]) => {
-    if (level >= 0 && level <= deadline) {
-      levels[level].push(node);
-    }
-  });
-  return { schedule, levels, maxLevel: deadline };
-}
-
-function getMinRequiredLevel(gate, gates) {
-  const memo = new Map();
-  function dfs(currentGate) {
-    if (memo.has(currentGate.output)) {
-      return memo.get(currentGate.output);
-    }
-    let maxInputLevel = 0;
-    for (const input of currentGate.inputs) {
-      const inputGate = gates.find((g) => g.output === input);
-      if (inputGate) {
-        maxInputLevel = Math.max(maxInputLevel, dfs(inputGate));
-      }
-    }
-    const result = maxInputLevel + 1;
-    memo.set(currentGate.output, result);
-    return result;
-  }
-  return dfs(gate);
-}
-
-// 输出调度结果
-function printScheduleResult(data, scheduleResult, scheduleType) {
-  if (!scheduleResult) return `${scheduleType}调度失败或无结果\n`;
-  let out = "";
-  out += `${scheduleType}调度结果：\n`;
-  out += `Input :${data.inputs.join(", ")}  Output :${data.outputs.join(
-    ", "
-  )}\n`;
-  out += `Total ${scheduleResult.maxLevel} Cycles\n`;
-  scheduleResult.levels.forEach((nodes, level) => {
-    if (level === 0) return;
-    const andGates = [];
-    const orGates = [];
-    const notGates = [];
-    nodes.forEach((node) => {
-      const gate = data.gates.find((g) => g.output === node);
-      if (gate) {
-        switch (gate.gate_type) {
-          case "and":
-            andGates.push(node);
-            break;
-          case "or":
-            orGates.push(node);
-            break;
-          case "not":
-            notGates.push(node);
-            break;
-        }
-      }
-    });
-    if (andGates.length > 0 || orGates.length > 0 || notGates.length > 0) {
-      const andStr = `{${andGates.join(",")}}`;
-      const orStr = `{${orGates.join(",")}}`;
-      const notStr = `{${notGates.join(",")}}`;
-      out += `Cycle ${level}: ${andStr},${orStr},${notStr}\n`;
-    }
-  });
-  return out;
-}
 </script>
 
 <style scoped>
-/* 共用样式 */
 .code-optimization-container {
   height: 100vh;
   display: flex;
@@ -421,7 +266,6 @@ function printScheduleResult(data, scheduleResult, scheduleType) {
   cursor: not-allowed;
 }
 
-/* 主要内容区样式 */
 .main-content {
   display: flex;
   flex: 1;
@@ -429,7 +273,6 @@ function printScheduleResult(data, scheduleResult, scheduleType) {
   height: calc(100% - 80px);
 }
 
-/* 两侧区域共用样式 */
 .code-input-section,
 .code-output-section {
   flex: 1;
@@ -485,7 +328,6 @@ function printScheduleResult(data, scheduleResult, scheduleType) {
   cursor: not-allowed;
 }
 
-/* 代码编辑器样式 */
 .code-editor {
   flex: 1;
   padding: 18px;
@@ -505,14 +347,13 @@ function printScheduleResult(data, scheduleResult, scheduleType) {
   background: #fff;
 }
 
-/* 优化后代码展示区 */
 .optimized-code {
   flex: 1;
   padding: 18px;
   margin: 0;
   overflow: auto;
   font-family: "JetBrains Mono", "Fira Mono", "Consolas", monospace;
-  font-size: 16px;
+  font-size: 15px;
   line-height: 1.7;
   color: #1a2b3c;
   background: #f7faff;
@@ -521,14 +362,12 @@ function printScheduleResult(data, scheduleResult, scheduleType) {
   border-radius: 0 0 14px 14px;
 }
 
-/* 状态消息样式 */
 .status-message {
   color: #909399;
   text-align: center;
   padding: 20px;
 }
 
-/* 下拉框和输入框样式 */
 select,
 input[type="number"] {
   background: #f7faff;

@@ -2,7 +2,7 @@
   <div class="home-container">
     <!-- 顶部标题 -->
     <div class="header">
-      <h1 class="title">AI开发者工具箱</h1>
+      <h1 class="title">逻辑综合工具设计</h1>
       <button class="cta-button" @click="navigateTo('/code-to-image')">
         开始探索
       </button>
@@ -11,43 +11,83 @@
     <!-- 主要内容区 -->
     <div class="content-wrapper">
       <div class="cards-container">
-        <!-- 代码生成图片 -->
+        <!-- 电路网表图绘制 -->
         <div
           class="feature-card"
           @click="navigateTo('/code-to-image')"
-          @mouseover="hoverFeature(1)"
+          @mouseover="hoverFeature(0)"
           @mouseleave="resetHover"
         >
-          <div class="icon" :class="{ animated: hoveredFeature === 1 }">✨</div>
-          <h3>代码生成图片</h3>
-          <p>将您的代码片段转换为美观的图片，方便分享和展示</p>
+          <div class="icon" :class="{ animated: hoveredFeature === 0 }">🖼️</div>
+          <h3>电路网表图绘制</h3>
+          <p>将您的电路代码一键生成美观的网表图片，便于分析与展示。</p>
+          <button
+            v-if="hoveredFeature === 0"
+            class="enter-btn"
+            @click.stop="navigateTo('/code-to-image')"
+          >
+            进入
+          </button>
         </div>
 
-        <!-- 代码优化 -->
+        <!-- 高阶优化 -->
         <div
           class="feature-card"
           @click="navigateTo('/code-optimization')"
-          @mouseover="hoverFeature(2)"
+          @mouseover="hoverFeature(1)"
           @mouseleave="resetHover"
         >
-          <div class="icon" :class="{ animated: hoveredFeature === 2 }">⚡</div>
-          <h3>代码优化</h3>
-          <p>AI驱动的代码优化建议，让您的代码更高效</p>
+          <div class="icon" :class="{ animated: hoveredFeature === 1 }">⚡</div>
+          <h3>高阶优化</h3>
+          <p>AI驱动的代码优化建议，让您的代码更高效、更优雅。</p>
+          <button
+            v-if="hoveredFeature === 1"
+            class="enter-btn"
+            @click.stop="navigateTo('/code-optimization')"
+          >
+            进入
+          </button>
         </div>
 
-        <!-- BLIF调度分析 -->
+        <!-- 调度算法 -->
         <div
           class="feature-card"
           @click="navigateTo('/asap')"
+          @mouseover="hoverFeature(2)"
+          @mouseleave="resetHover"
+        >
+          <div class="icon" :class="{ animated: hoveredFeature === 2 }">🧮</div>
+          <h3>调度算法</h3>
+          <p>支持ASAP/ALAP等多种调度算法，适合数字电路课程实验。</p>
+          <button
+            v-if="hoveredFeature === 2"
+            class="enter-btn"
+            @click.stop="navigateTo('/asap')"
+          >
+            进入
+          </button>
+        </div>
+
+        <!-- ILP求解调度 -->
+        <div
+          class="feature-card"
+          @click="navigateTo('/ilp')"
           @mouseover="hoverFeature(3)"
           @mouseleave="resetHover"
         >
-          <div class="icon" :class="{ animated: hoveredFeature === 3 }">🧮</div>
-          <h3>BLIF调度分析</h3>
-          <p>支持ASAP/ALAP调度，适合数字电路课程实验</p>
+          <div class="icon" :class="{ animated: hoveredFeature === 3 }">📊</div>
+          <h3>ILP求解调度</h3>
+          <p>整数线性规划调度，适合复杂任务分配与优化。</p>
+          <button
+            v-if="hoveredFeature === 3"
+            class="enter-btn"
+            @click.stop="navigateTo('/ilp')"
+          >
+            进入
+          </button>
         </div>
 
-        <!-- 流程图编辑器 -->
+        <!-- 电路编辑 -->
         <div
           class="feature-card"
           @click="navigateTo('/about')"
@@ -55,20 +95,15 @@
           @mouseleave="resetHover"
         >
           <div class="icon" :class="{ animated: hoveredFeature === 4 }">🗺️</div>
-          <h3>流程图编辑器</h3>
-          <p>可视化流程图绘制与导出，支持自定义节点</p>
-        </div>
-
-        <!-- ILP调度分析 -->
-        <div
-          class="feature-card"
-          @click="navigateTo('/ilp')"
-          @mouseover="hoverFeature(5)"
-          @mouseleave="resetHover"
-        >
-          <div class="icon" :class="{ animated: hoveredFeature === 5 }">📊</div>
-          <h3>ILP调度分析</h3>
-          <p>整数线性规划调度，适合复杂任务分配与优化</p>
+          <h3>电路编辑</h3>
+          <p>可视化电路流程图绘制与导出，支持自定义节点。</p>
+          <button
+            v-if="hoveredFeature === 4"
+            class="enter-btn"
+            @click.stop="navigateTo('/about')"
+          >
+            进入
+          </button>
         </div>
 
         <!-- 试试手气 -->
@@ -88,17 +123,13 @@
 </template>
 
 <script setup>
-import { ref, onMounted, onBeforeUnmount } from "vue";
+import { ref } from "vue";
 import { useRouter } from "vue-router";
-import * as echarts from "echarts";
-import "echarts-wordcloud";
 
 const router = useRouter();
-
-const hoveredFeature = ref(0);
+const hoveredFeature = ref(-1);
 const isRotated = ref(false);
 const currentMessage = ref(0);
-const wordCloudChart = ref(null);
 
 const funMessages = [
   "你今天看起来很棒！",
@@ -111,7 +142,6 @@ const funMessages = [
   "今天适合写代码，也适合摸鱼~",
 ];
 
-// 彩色背景池
 const funBgColors = [
   "linear-gradient(135deg,#f7b42c 0%,#fc575e 100%)",
   "linear-gradient(135deg,#43cea2 0%,#185a9d 100%)",
@@ -130,7 +160,7 @@ const hoverFeature = (index) => {
 };
 
 const resetHover = () => {
-  hoveredFeature.value = 0;
+  hoveredFeature.value = -1;
 };
 
 const rotateCard = () => {
@@ -148,93 +178,6 @@ const rotateCard = () => {
     }, 2200);
   }
 };
-
-// 词云数据
-const wordCloudData = [
-  { name: "Vue", value: 10000 },
-  { name: "React", value: 8000 },
-  { name: "JavaScript", value: 9500 },
-  { name: "TypeScript", value: 8500 },
-  { name: "ECharts", value: 7000 },
-  { name: "Node.js", value: 7500 },
-  { name: "Webpack", value: 6500 },
-  { name: "Vite", value: 6000 },
-  { name: "AI", value: 9000 },
-  { name: "机器学习", value: 5500 },
-  { name: "深度学习", value: 5000 },
-  { name: "前端开发", value: 8000 },
-  { name: "后端开发", value: 7500 },
-  { name: "数据可视化", value: 7000 },
-  { name: "算法", value: 6500 },
-];
-
-let chartInstance = null;
-
-const initWordCloud = () => {
-  if (!wordCloudChart.value) return;
-  chartInstance = echarts.init(wordCloudChart.value);
-  const option = {
-    backgroundColor: "transparent",
-    tooltip: { show: true },
-    series: [
-      {
-        type: "wordCloud",
-        shape: "circle",
-        left: "center",
-        top: "center",
-        width: "100%",
-        height: "100%",
-        sizeRange: [12, 40],
-        rotationRange: [-45, 45],
-        rotationStep: 15,
-        gridSize: 10,
-        drawOutOfBound: false,
-        textStyle: {
-          fontFamily: "Microsoft YaHei",
-          fontWeight: "bold",
-          color: function () {
-            const colors = [
-              "#409EFF",
-              "#67C23A",
-              "#E6A23C",
-              "#F56C6C",
-              "#909399",
-              "#c23531",
-              "#2f4554",
-              "#61a0a8",
-              "#d48265",
-              "#91c7ae",
-            ];
-            return colors[Math.floor(Math.random() * colors.length)];
-          },
-        },
-        emphasis: {
-          focus: "self",
-          textStyle: {
-            shadowBlur: 10,
-            shadowColor: "#333",
-          },
-        },
-        data: wordCloudData,
-      },
-    ],
-  };
-  chartInstance.setOption(option);
-};
-
-const resizeChart = () => {
-  chartInstance?.resize();
-};
-
-onMounted(() => {
-  initWordCloud();
-  window.addEventListener("resize", resizeChart);
-});
-
-onBeforeUnmount(() => {
-  window.removeEventListener("resize", resizeChart);
-  chartInstance?.dispose();
-});
 </script>
 
 <style scoped>
@@ -397,30 +340,24 @@ onBeforeUnmount(() => {
   margin-top: 10px;
 }
 
-.word-cloud-card {
-  grid-column: 1 / -1;
-  background: #fff;
-  border-radius: 16px;
-  box-shadow: 0 4px 24px rgba(79, 140, 255, 0.07);
-  padding: 30px;
-  display: flex;
-  flex-direction: column;
-  height: 350px;
-  border: 1.5px solid #e3eaf2;
+.enter-btn {
+  margin-top: 18px;
+  background: linear-gradient(90deg, #4f8cff 0%, #6fc3ff 100%);
+  color: #fff;
+  border: none;
+  padding: 7px 28px;
+  border-radius: 18px;
+  font-size: 15px;
+  font-weight: 500;
+  cursor: pointer;
+  box-shadow: 0 2px 8px 0 rgba(79, 140, 255, 0.08);
+  transition: all 0.2s;
+  opacity: 0.95;
 }
 
-.word-cloud-card h3 {
-  color: #357ae8;
-  margin: 0 0 15px;
-  text-align: center;
-  font-size: 18px;
-  font-weight: 700;
-}
-
-.word-cloud-chart {
-  width: 100%;
-  height: 100%;
-  flex: 1;
+.enter-btn:hover {
+  background: linear-gradient(90deg, #357ae8 0%, #4f8cff 100%);
+  box-shadow: 0 4px 16px 0 rgba(79, 140, 255, 0.15);
 }
 
 @media (max-width: 1200px) {

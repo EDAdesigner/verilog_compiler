@@ -84,14 +84,23 @@ const statusMessage = ref("");
 const deadline = ref(5);
 const scheduleType = ref("ASAP");
 
-const exampleCode = `.model test
-.inputs a b c
-.outputs y
+const exampleCode = `.model complex_example
+.inputs a b c d
+.outputs y z
 .names a b n1
 11 1
-.names n1 c y
+.names c d n2
 1- 1
 -1 1
+.names n1 n2 n3
+11 1
+.names n3 a y
+1- 1
+-1 1
+.names n2 b z
+1- 1
+-1 1
+.end
 `;
 
 const clearCode = () => {

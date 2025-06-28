@@ -3,8 +3,10 @@
     <div class="sidebar-bg"></div>
     <div class="sidebar-content">
       <div class="sidebar-header">
-        <div class="app-logo"></div>
-        <h2 class="app-title">不知道叫什么名字</h2>
+        <div class="app-logo" style="font-size: 28px; line-height: 36px">
+          🔌
+        </div>
+        <h2 class="app-title">逻辑综合工具设计</h2>
       </div>
 
       <div class="menu-items">
@@ -40,22 +42,22 @@ const menuItems = ref([
     icon: "&#xe608;", // 使用Unicode图标或SVG
   },
   {
-    text: "代码生成图片",
+    text: "电路网表图绘制",
     path: "/code-to-image",
     icon: "&#xe62c;",
   },
   {
-    text: "代码优化",
+    text: "高阶优化",
     path: "/code-optimization",
     icon: "&#xe68f;",
   },
   {
-    text: "ASAP调度",
+    text: "调度算法",
     path: "/asap",
     icon: "&#xe611;",
   },
   {
-    text: "ILP",
+    text: "ILP求解调度",
     path: "/ilp",
     icon: "&#xe602;",
   },
@@ -76,10 +78,13 @@ const navigateTo = (path) => {
 <style scoped>
 /* 在线链接服务仅供平台体验和调试使用，平台不承诺服务的稳定性，企业客户需下载字体包自行发布使用并做好备份。 */
 @font-face {
-  font-family: 'iconfont';  /* Project id 4900944 */
-  src: url('//at.alicdn.com/t/c/font_4900944_t9wvoi5416.woff2?t=1751038265379') format('woff2'),
-       url('//at.alicdn.com/t/c/font_4900944_t9wvoi5416.woff?t=1751038265379') format('woff'),
-       url('//at.alicdn.com/t/c/font_4900944_t9wvoi5416.ttf?t=1751038265379') format('truetype');
+  font-family: "iconfont"; /* Project id 4900944 */
+  src: url("//at.alicdn.com/t/c/font_4900944_t9wvoi5416.woff2?t=1751038265379")
+      format("woff2"),
+    url("//at.alicdn.com/t/c/font_4900944_t9wvoi5416.woff?t=1751038265379")
+      format("woff"),
+    url("//at.alicdn.com/t/c/font_4900944_t9wvoi5416.ttf?t=1751038265379")
+      format("truetype");
 }
 /* 基础样式 */
 .sidebar {
