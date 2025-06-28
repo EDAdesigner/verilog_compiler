@@ -7,6 +7,7 @@ import uuid
 from graphviz import Digraph
 from verilog_parser import VerilogParser
 from dot_generator import DotGenerator
+from new_dot_generator import EnhancedDotGenerator
 from fastapi.middleware.cors import CORSMiddleware
 
 # 创建输出目录
@@ -43,8 +44,18 @@ def process_verilog(verilog_code, optimize=False):
         optimizer = CSEOptimizer()
         module = optimizer.optimize_module(module)
 
-    # 生成DOT图
-    dot_generator = DotGenerator(module)
+    # 生成DOT图 - 使用增强型图形生成器
+    dot_generator = EnhancedDotGenerator(module)
+    # 强制显示内部细节
+    dot_generator.set_show_internal(True)
+    # 根据模块类型自动检测和设置样式
+    if hasattr(module, 'name'):
+        if 'mux' in module.name.lower() or 'select' in module.name.lower():
+            print("检测到多路选择器，使用专用样式...")
+            dot_generator.set_style('mux')
+        elif 'adder' in module.name.lower():
+            print("检测到加法器，使用专用样式...")
+            dot_generator.set_style('adder')
     dot = dot_generator.generate_dot()
 
     # 生成唯一文件名
