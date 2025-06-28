@@ -1,0 +1,30 @@
+digraph parenthesis_demo {
+	graph [concentrate=false dpi=300 nodesep=0.5 ordering=out rankdir=LR ranksep=0.8 splines=polyline]
+	node [fillcolor=white fontname=Arial fontsize=12 height=0.4 margin=0.1 penwidth=1.0 shape=record style=filled width=0.6]
+	edge [arrowhead=normal arrowsize=0.6 fontname=Arial fontsize=10 penwidth=1.0]
+	a [label=a fillcolor=lightblue shape=ellipse style=filled]
+	b [label=b fillcolor=lightblue shape=ellipse style=filled]
+	c [label=c fillcolor=lightblue shape=ellipse style=filled]
+	y1 [label=y1 fillcolor=lightyellow shape=box style=filled]
+	y2 [label=y2 fillcolor=lightyellow shape=box style=filled]
+	op_AND_03 [label="{{<A> left|<B> right}|{03\nAND}|<out> AND_out}" fillcolor=lightpink shape=record style=filled]
+	b -> op_AND_03:A
+	c -> op_AND_03:B
+	op_OR_02 [label="{{<A> left|<B> right}|{03\nOR}|<out> OR_out}" fillcolor=lightpink shape=record style=filled]
+	a -> op_OR_02:A
+	op_AND_03:out -> op_OR_02:B
+	op_OR_02:out -> y1
+	op_OR_05 [label="{{<A> left|<B> right}|{05\nOR}|<out> OR_out}" fillcolor=lightpink shape=record style=filled]
+	a -> op_OR_05:A
+	b -> op_OR_05:B
+	op_AND_04 [label="{{<A> left|<B> right}|{05\nAND}|<out> AND_out}" fillcolor=lightpink shape=record style=filled]
+	op_OR_05:out -> op_AND_04:A
+	c -> op_AND_04:B
+	op_AND_04:out -> y2
+	subgraph cluster_inputs {
+		color=lightblue label=Inputs rank=source style=filled
+		a
+		b
+		c
+	}
+}

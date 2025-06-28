@@ -1,0 +1,14 @@
+digraph unary_example {
+	graph [concentrate=false dpi=300 nodesep=0.5 ordering=out rankdir=LR ranksep=0.8 splines=polyline]
+	node [fillcolor=white fontname=Arial fontsize=12 height=0.4 margin=0.1 penwidth=1.0 shape=record style=filled width=0.6]
+	edge [arrowhead=normal arrowsize=0.6 fontname=Arial fontsize=10 penwidth=1.0]
+	a [label=a fillcolor=lightblue shape=ellipse style=filled]
+	y [label=y fillcolor=lightyellow shape=box style=filled]
+	op_NOT_01 [label="{{<A> right}|{01\nNOT}|<out> NOT_out}" fillcolor=lightpink shape=record style=filled]
+	a -> op_NOT_01:A
+	op_NOT_01:out -> y
+	subgraph cluster_inputs {
+		color=lightblue label=Inputs rank=source style=filled
+		a
+	}
+}
