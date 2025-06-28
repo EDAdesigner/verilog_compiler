@@ -3,6 +3,7 @@
 
 from fastapi import FastAPI, HTTPException, UploadFile, File, Form
 from fastapi.responses import JSONResponse
+from fastapi.middleware.cors import CORSMiddleware
 import uvicorn
 import os
 import uuid
@@ -29,6 +30,23 @@ app = FastAPI(
     title="Verilog编译器API",
     description="提供Verilog代码编译和优化的API服务",
     version="1.0.0"
+)
+
+# 添加CORS中间件
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=[
+        "http://localhost:5173",  # Vite默认端口
+        "http://localhost:3000",  # React默认端口
+        "http://localhost:8080",  # Vue CLI默认端口
+        "http://127.0.0.1:5173",
+        "http://127.0.0.1:3000",
+        "http://127.0.0.1:8080",
+        "*"  # 允许所有来源（开发环境使用，生产环境建议指定具体域名）
+    ],
+    allow_credentials=True,
+    allow_methods=["*"],  # 允许所有HTTP方法
+    allow_headers=["*"],  # 允许所有请求头
 )
 
 # 确保输出目录存在
