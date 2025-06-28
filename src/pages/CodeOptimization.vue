@@ -50,6 +50,12 @@
             >
               下载
             </button>
+            <button
+              class="tool-btn"
+              :disabled="!optimizedCode"
+            >
+              跳转至编辑器
+            </button>
           </div>
         </div>
         <pre class="optimized-code">{{
