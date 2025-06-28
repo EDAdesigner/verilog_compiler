@@ -1,0 +1,27 @@
+digraph unbalanced_add4 {
+	graph [concentrate=false dpi=300 nodesep=0.5 ordering=out rankdir=LR ranksep=0.8 splines=polyline]
+	node [fillcolor=white fontname=Arial fontsize=12 height=0.4 margin=0.1 penwidth=1.0 shape=record style=filled width=0.6]
+	edge [arrowhead=normal arrowsize=0.6 fontname=Arial fontsize=10 penwidth=1.0]
+	a [label=a fillcolor=lightblue shape=ellipse style=filled]
+	b [label=b fillcolor=lightblue shape=ellipse style=filled]
+	c [label=c fillcolor=lightblue shape=ellipse style=filled]
+	d [label=d fillcolor=lightblue shape=ellipse style=filled]
+	out [label=out fillcolor=lightyellow shape=box style=filled]
+	op_ADD_03 [label="{{<A> left|<B> right}|{03\nADD}|<out> ADD_out}" fillcolor=lightpink shape=record style=filled]
+	a -> op_ADD_03:A
+	b -> op_ADD_03:B
+	op_ADD_02 [label="{{<A> left|<B> right}|{03\nADD}|<out> ADD_out}" fillcolor=lightpink shape=record style=filled]
+	op_ADD_03:out -> op_ADD_02:A
+	c -> op_ADD_02:B
+	op_ADD_01 [label="{{<A> left|<B> right}|{03\nADD}|<out> ADD_out}" fillcolor=lightpink shape=record style=filled]
+	op_ADD_02:out -> op_ADD_01:A
+	d -> op_ADD_01:B
+	op_ADD_01:out -> out
+	subgraph cluster_inputs {
+		color=lightblue label=Inputs rank=source style=filled
+		a
+		b
+		c
+		d
+	}
+}

@@ -1,0 +1,37 @@
+digraph "module_32f1fb65-aed6-4327-b641-3ebe3570a3ba" {
+	graph [concentrate=false dpi=300 nodesep=0.5 ordering=out rankdir=LR ranksep=0.8 splines=polyline]
+	node [fillcolor=white fontname=Arial fontsize=12 height=0.4 margin=0.1 penwidth=1.0 shape=record style=filled width=0.6]
+	edge [arrowhead=normal arrowsize=0.6 fontname=Arial fontsize=10 penwidth=1.0]
+	a [label=a fillcolor=lightblue shape=ellipse style=filled]
+	b [label=b fillcolor=lightblue shape=ellipse style=filled]
+	c [label=c fillcolor=lightblue shape=ellipse style=filled]
+	d [label=d fillcolor=lightblue shape=ellipse style=filled]
+	out [label=out fillcolor=lightgreen shape=ellipse style=filled]
+	temp_wire_0 [label=temp_wire_0 fillcolor=lightyellow shape=box style=filled]
+	temp_wire_1 [label=temp_wire_1 fillcolor=lightyellow shape=box style=filled]
+	temp_wire_2 [label=temp_wire_2 fillcolor=lightyellow shape=box style=filled]
+	temp_wire_2 -> out
+	op_ADD_03 [label="{{<A> left|<B> right}|{03\nADD}|<out> ADD_out}" fillcolor=lightpink shape=record style=filled]
+	temp_wire_0 -> op_ADD_03:A
+	temp_wire_1 -> op_ADD_03:B
+	op_ADD_03:out -> temp_wire_2
+	op_ADD_04 [label="{{<A> left|<B> right}|{04\nADD}|<out> ADD_out}" fillcolor=lightpink shape=record style=filled]
+	a -> op_ADD_04:A
+	b -> op_ADD_04:B
+	op_ADD_04:out -> temp_wire_0
+	op_ADD_05 [label="{{<A> left|<B> right}|{05\nADD}|<out> ADD_out}" fillcolor=lightpink shape=record style=filled]
+	c -> op_ADD_05:A
+	d -> op_ADD_05:B
+	op_ADD_05:out -> temp_wire_1
+	subgraph cluster_inputs {
+		color=lightblue label=Inputs rank=source style=filled
+		a
+		b
+		c
+		d
+	}
+	subgraph cluster_outputs {
+		color=lightgreen label=Outputs rank=sink style=filled
+		out
+	}
+}
