@@ -72,8 +72,8 @@ app.add_middleware(
 OUTPUT_DIR = Path("./output")
 OUTPUT_DIR.mkdir(exist_ok=True)
 
-# 挂载静态文件服务 - 将output目录暴露为/files路径
-app.mount("/files", StaticFiles(directory=str(OUTPUT_DIR)), name="files")
+# 挂载静态文件服务 - 将output目录暴露为/output路径
+app.mount("/output", StaticFiles(directory=str(OUTPUT_DIR)), name="output")
 
 @app.options("/{full_path:path}")
 async def options_handler(full_path: str):
@@ -145,8 +145,8 @@ def compile_verilog_code(verilog_code: str, optimize: bool = False, enhanced_sty
             dot_file, png_file = dot_generator.save(str(output_base))
         
         # 将文件路径转换为URL路径
-        dot_url = f"/files/{file_id}.dot"
-        png_url = f"/files/{file_id}.png"
+        dot_url = f"/output/{file_id}.dot"
+        png_url = f"/output/{file_id}.png"
         
         return {
             "status": "success",
@@ -229,10 +229,10 @@ async def root():
         "endpoints": {
             "/verilog": "编译Verilog代码（POST）",
             "/optimize": "优化编译Verilog代码（POST）",
-            "/files": "静态文件服务（GET）"
+            "/output": "静态文件服务（GET）"
         },
         "optimization_available": OPTIMIZATION_AVAILABLE,
-        "static_files_url": "http://localhost:8000/files"
+        "static_files_url": "http://localhost:8000/output"
     }
 
 @app.get("/health")
@@ -245,7 +245,7 @@ if __name__ == "__main__":
     print(f"优化模块可用: {OPTIMIZATION_AVAILABLE}")
     print("服务器将在 http://localhost:8000 上运行")
     print("API文档可在 http://localhost:8000/docs 查看")
-    print("静态文件服务可在 http://localhost:8000/files 访问")
+    print("静态文件服务可在 http://localhost:8000/output 访问")
     
     uvicorn.run(
         "server:app",
