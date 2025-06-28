@@ -32,7 +32,7 @@ app = FastAPI(
 )
 
 # 确保输出目录存在
-OUTPUT_DIR = Path("../output")
+OUTPUT_DIR = Path("./output")
 OUTPUT_DIR.mkdir(exist_ok=True)
 
 def compile_verilog_code(verilog_code: str, optimize: bool = False, enhanced_style: bool = True):
